@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tuition Tracker</title>
+<meta name="theme-color" content="#2F5BEA">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600;700;800&family=Noto+Sans+Gujarati:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;500;600;700;800&family=Noto+Sans+Telugu:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F4F6FB;--card:#fff;--ink:#14213D;--sub:#5F6B85;--teal:#0E8A7C;--gold:#F59E0B;--coral:#E5484D;--violet:#2F5BEA;--line:#E1E6F0;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0B1220;--card:#131C2E;--ink:#EAF0FF;--sub:#93A1BF;--line:#24304A;--violet:#4F7DF3}}
+:root[data-theme="dark"]{--bg:#0B1220;--card:#131C2E;--ink:#EAF0FF;--sub:#93A1BF;--line:#24304A;--violet:#4F7DF3}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,"Noto Sans Devanagari","Noto Sans Bengali","Noto Sans Gujarati","Noto Sans Tamil","Noto Sans Telugu",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.35;display:flex;justify-content:center}
+.phone{width:100%;max-width:420px;min-height:100vh;display:flex;flex-direction:column}
+.screen{display:none;flex:1;flex-direction:column;padding:16px 18px 20px}
+.screen.on{display:flex}
+.top{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.top h2{flex:1;margin:0;font-size:20px;font-weight:800}
+.ib{width:42px;height:42px;border-radius:14px;border:2px solid var(--line);background:var(--card);color:var(--ink);font-size:20px;cursor:pointer;font-family:inherit}
+.ib:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(--violet);outline-offset:2px}
+.hero{background:linear-gradient(135deg,var(--violet),var(--teal));color:#fff;border-radius:26px;padding:22px 20px;position:relative}
+.hero h1{margin:0;font-size:28px;line-height:1.1;font-weight:800;max-width:75%}
+.lang{position:absolute;right:14px;top:14px;background:rgba(255,255,255,.22);color:#fff;border:1.5px solid rgba(255,255,255,.6);border-radius:99px;padding:4px 12px;font:600 14px inherit;font-family:inherit;cursor:pointer}
+.roles{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:22px 0}
+.role{background:var(--card);border:3px solid var(--line);border-radius:22px;padding:16px 12px;min-height:150px;text-align:left;font-family:inherit;color:var(--ink);cursor:pointer;position:relative;font-size:18px;font-weight:800}
+.role span{display:block;font-size:36px;margin-bottom:6px}
+.role i{position:absolute;right:10px;top:10px;width:26px;height:26px;border:2.5px solid var(--line);border-radius:8px;font-style:normal;text-align:center;line-height:22px;color:#fff}
+.role.sel{border-color:var(--teal)}
+.role.sel i{background:var(--teal);border-color:var(--teal)}
+.btn{background:var(--ink);color:var(--bg);border:0;border-radius:99px;padding:14px;font:800 18px inherit;font-family:inherit;cursor:pointer;width:100%;margin-top:auto}
+.btn.teal{background:var(--teal);color:#fff}
+.foot{text-align:center;margin-top:14px;color:var(--sub);font-weight:600}
+.flag{display:inline-block;width:26px;height:17px;vertical-align:middle;border-radius:3px;background:linear-gradient(#FF9933 33%,#fff 33% 66%,#138808 66%);border:1px solid var(--line)}
+.field{display:flex;flex-direction:column;margin-bottom:14px}
+.field label{font-weight:600;font-size:14px;color:var(--sub);margin-bottom:4px}
+.field .w{display:flex;gap:8px}
+.field input{flex:1;min-width:0;padding:13px 16px;border:2px solid var(--line);border-radius:18px;background:var(--card);color:var(--ink);font:600 16px inherit;font-family:inherit}
+.sub{color:var(--sub);margin:0 0 16px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px}
+.tile{border:0;border-radius:24px;padding:18px 14px;min-height:130px;text-align:left;color:#fff;font:800 19px/1.15 inherit;font-family:inherit;cursor:pointer}
+.tile span{display:block;font-size:34px;margin-bottom:8px}
+.t1{background:var(--violet)}.t2{background:var(--teal)}.t3{background:var(--coral)}.t4{background:var(--gold);color:#3A2600}
+.hello{font-size:22px;font-weight:800;margin:4px 0 0}
+.card{background:var(--card);border:2px solid var(--line);border-radius:22px;padding:14px 16px;margin-bottom:14px}
+.card h3{margin:0;font-size:19px}
+.mut{color:var(--sub);font-size:14px;font-weight:600}
+.row{display:flex;gap:10px;margin-top:10px}
+.pa{flex:1;border-radius:14px;border:2.5px solid var(--line);background:transparent;color:var(--ink);padding:9px;font:800 16px inherit;font-family:inherit;cursor:pointer}
+.pa.p.on{background:var(--teal);border-color:var(--teal);color:#fff}
+.pa.a.on{background:var(--coral);border-color:var(--coral);color:#fff}
+.call{background:var(--gold);color:#3A2600;border:0;border-radius:14px;padding:9px 16px;font:800 15px inherit;font-family:inherit;cursor:pointer}
+.stat{display:flex;gap:10px;margin-top:10px}
+.stat div{flex:1;background:var(--bg);border-radius:14px;padding:8px 12px}
+.stat b{display:block;font-size:24px}
+.badge{display:inline-block;border-radius:99px;padding:2px 12px;font-weight:800;color:#fff;background:var(--sub)}
+.badge.P{background:var(--teal)}.badge.A{background:var(--coral)}
+.sheet{position:fixed;inset:0;background:rgba(10,12,40,.55);display:none;align-items:flex-end;justify-content:center}
+.sheet.on{display:flex}
+.sheet div{background:var(--card);width:100%;max-width:420px;border-radius:26px 26px 0 0;padding:18px;max-height:70vh;overflow:auto}
+.sheet button{display:block;width:100%;text-align:left;border:0;background:none;color:var(--ink);padding:11px 6px;font:600 17px inherit;font-family:inherit;border-bottom:1px solid var(--line);cursor:pointer}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:99px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%;text-align:center}
+.toast.on{opacity:1}
+.note{background:var(--gold);color:#3A2600;text-align:center;font-weight:600;font-size:13px;padding:4px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:2px solid var(--line);border-radius:99px;padding:6px 14px;background:var(--card);color:var(--ink);font:600 15px inherit;font-family:inherit;cursor:pointer}
+.chip.on{background:var(--violet);border-color:var(--violet);color:#fff}
+.tm{flex:1;min-width:0;padding:11px 12px;border:2px solid var(--line);border-radius:16px;background:var(--card);color:var(--ink);font:600 16px inherit;font-family:inherit}
+.rc{display:flex;align-items:center;gap:6px;padding:6px 6px 6px 16px}
+.rc .main{flex:1;text-align:left;background:none;border:0;color:inherit;font-family:inherit;cursor:pointer;padding:8px 0}
+.rc .dots{width:44px;height:44px;border:0;background:none;color:var(--ink);font-size:26px;cursor:pointer}
+.empty{text-align:center;color:var(--sub);padding:30px 10px;font-weight:600}
+.bar{height:10px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;background:var(--teal)}
+.hwimg{width:100%;border-radius:16px;margin-top:10px;display:block}
+.btn,.btn.teal{background:var(--violet);color:#fff}
+.hero{background:linear-gradient(135deg,#2F5BEA,#1B3A9E)}
+.hello{font-size:24px;font-weight:700;margin:2px 0 14px}
+.tile{background:var(--card);color:var(--ink);border:1.5px solid var(--line);box-shadow:0 2px 10px rgba(20,33,61,.07);font:700 17px/1.25 inherit;font-family:inherit}
+.tile.t1,.tile.t2,.tile.t3,.tile.t4{background:var(--card);color:var(--ink)}
+.tile .ic,.role .ic{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;margin-bottom:14px;color:#fff;font-size:0}
+.t1 .ic{background:#2F5BEA}.t2 .ic{background:#0E8A7C}.t3 .ic{background:#D97706}.t4 .ic{background:#7048E8}
+.role .ic{background:#2F5BEA;margin-bottom:12px}
+.role.sel{border-color:var(--violet)}.role.sel i{background:var(--violet);border-color:var(--violet)}
+.call{background:var(--teal);color:#fff}
+.ib svg{display:block;margin:auto}
+.chip.on{background:var(--violet);border-color:var(--violet)}
+.empty{color:var(--sub);text-align:center;padding:36px 12px;font-weight:600}
+.pa:disabled{opacity:.45;cursor:not-allowed}
+.lk{background:none;border:0;color:var(--violet);font:700 16px inherit;font-family:inherit;margin-top:14px;cursor:pointer;padding:8px}
+.spin{width:44px;height:44px;border:5px solid #fff;border-top-color:var(--violet);border-radius:50%;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="phone">
+
+<section class="screen on" id="s1">
+  <div class="hero"><h1>I am your Tuition Study Tracker</h1><button class="lang" onclick="openLang()">Language</button></div>
+  <div class="roles">
+    <button class="role" id="rT" onclick="pick('T')"><i>&#10003;</i><span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9l10-5 10 5-10 5-10-5zM6 11.5V16c0 1.5 3 3 6 3s6-1.5 6-3v-4.5"/></svg></span>As a Tuition Teacher</button>
+    <button class="role" id="rP" onclick="pick('P')"><i>&#10003;</i><span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.8a3.5 3.5 0 0 1 0 6.4M18 14.3a6.5 6.5 0 0 1 3.5 5.7"/></svg></span>As a Parent</button>
+  </div>
+  <button class="btn" onclick="goRole()">Continue</button>
+  <button class="lk" onclick="show('s14')">Already have an account? Log in</button>
+  <div class="foot">Make in India <span class="flag"></span></div>
+  <div class="foot" style="margin-top:4px"><a href="privacy.html" target="_blank" rel="noopener" style="color:var(--sub)">Privacy policy</a></div>
+</section>
+
+<section class="screen" id="s14">
+  <div class="top"><button class="ib" onclick="show('s1')" aria-label="Back">&#8592;</button><h2>Log in</h2></div>
+  <div class="field"><label for="lgE">Gmail</label><input id="lgE" type="email" autocomplete="email" placeholder="Enter your Gmail"></div>
+  <div class="field"><label for="lgP">Password</label><div class="w"><input id="lgP" type="password" autocomplete="current-password" placeholder="Password"><button class="ib" onclick="eye('lgP')" aria-label="Show password"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
+  <button class="btn teal" onclick="doLogin()">Log in</button>
+  <button class="lk" onclick="forgot()">Forgot password?</button>
+</section>
+
+<section class="screen" id="s15">
+  <div class="top"><h2>Set a new password</h2></div>
+  <div class="field"><label for="np1">New password</label><div class="w"><input id="np1" type="password" autocomplete="new-password" placeholder="New password"><button class="ib" onclick="eye('np1')" aria-label="Show password"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
+  <button class="btn teal" onclick="saveNewPassword()">Save</button>
+</section>
+
+<section class="screen" id="s2">
+  <div class="top"><button class="ib" onclick="show('s1')" aria-label="Back">&#8592;</button><h2>As a Tuition Teacher</h2></div>
+  <p class="sub">Create your account</p>
+  <div class="field"><label for="tn">Your name</label><input id="tn" placeholder="Enter your name"></div>
+  <div class="field"><label for="tg">Gmail</label><input id="tg" type="email" placeholder="Enter your Gmail"></div>
+  <div class="field"><label for="tp">Password</label><div class="w"><input id="tp" type="password" placeholder="Set a password"><button class="ib" onclick="eye('tp')" aria-label="Show password"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
+  <div class="field"><label for="tph">Phone number</label><input id="tph" type="tel" placeholder="Enter phone number"></div>
+  <button class="btn teal" onclick="goDash('T')">Continue</button>
+</section>
+
+<section class="screen" id="s3">
+  <div class="top"><button class="ib" onclick="show('s1')" aria-label="Back">&#8592;</button><h2>As a Parent</h2></div>
+  <p class="sub">Create your account</p>
+  <div class="field"><label for="pg">Gmail</label><input id="pg" type="email" placeholder="Enter your Gmail"></div>
+  <div class="field"><label for="pp">Password</label><div class="w"><input id="pp" type="password" placeholder="Set a password"><button class="ib" onclick="eye('pp')" aria-label="Show password"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
+  <div class="field"><label for="pph">Phone number</label><input id="pph" type="tel" placeholder="Enter phone number"></div>
+  <div class="field"><label for="pn">Parent name</label><input id="pn" placeholder="Enter parent name"></div>
+  <div class="field"><label for="ps">Student name</label><input id="ps" placeholder="Enter student name"></div>
+  <button class="btn teal" onclick="goDash('P')">Continue</button>
+</section>
+
+<section class="screen" id="s4">
+  <div class="top"><h2>Dashboard</h2><button class="ib" onclick="openSet()" aria-label="Settings"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></button></div>
+  <p class="hello">Hello, <span id="hnT">Teacher</span></p>
+  <div class="grid">
+    <button class="tile t1" onclick="openAdd()"><span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>Add Class Rooms</button>
+    <button class="tile t2" onclick="openRooms()"><span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M5 21V9l7-5 7 5v12M9 21v-6h6v6"/></svg></span>My Class Rooms</button>
+    <button class="tile t3" onclick="openHw()"><span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4zM13.5 6.5l4 4"/></svg></span>Daily Homeworks</button>
+    <button class="tile t4" onclick="openStat('T')"><span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20v-8M10 20V4M16 20v-6M2 20h20"/></svg></span>All Student Statements</button>
+  </div>
+</section>
+
+<section class="screen" id="s11">
+  <div class="top"><button class="ib" onclick="show('s5')" aria-label="Back">&#8592;</button><h2>Connect Class Rooms</h2></div>
+  <p class="sub">Enter the code given by your teacher</p>
+  <div class="field"><label for="jl">Class code</label><input id="jl" maxlength="8" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="Enter the class code" style="text-transform:uppercase;letter-spacing:.15em"></div>
+  <button class="btn teal" onclick="joinRoom()">Join</button>
+</section>
+
+<section class="screen" id="s5">
+  <div class="top"><h2>Dashboard</h2><button class="ib" onclick="openSet()" aria-label="Settings"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></button></div>
+  <p class="hello">Hello, <span id="hnP">Parent</span></p>
+  <div class="grid">
+    <button class="tile t1" onclick="document.getElementById('jl').value='';show('s11')"><span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg></span>Connect Class Rooms</button>
+    <button class="tile t2" onclick="openParentRooms()"><span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.8a3.5 3.5 0 0 1 0 6.4M18 14.3a6.5 6.5 0 0 1 3.5 5.7"/></svg></span>My Child Class Rooms</button>
+    <button class="tile t3" onclick="openStat('P')"><span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20v-8M10 20V4M16 20v-6M2 20h20"/></svg></span>My Child Statements</button>
+    <button class="tile t4" onclick="openHw()"><span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4zM13.5 6.5l4 4"/></svg></span>Daily Homework</button>
+  </div>
+</section>
+
+<section class="screen" id="s9">
+  <div class="top"><button class="ib" onclick="show('s4')" aria-label="Back">&#8592;</button><h2>My Class Rooms</h2></div>
+  <div id="rooms"></div>
+  <button class="btn teal" onclick="openAdd()">Add Class Room</button>
+</section>
+
+<section class="screen" id="s10">
+  <div class="top"><button class="ib" onclick="show('s9')" aria-label="Back">&#8592;</button><h2 id="ft">Add Class Room</h2></div>
+  <div class="field"><label>Subjects (select one or more)</label><div class="chips" id="cSub"></div></div>
+  <div class="field"><label for="fn">Number of students</label><input id="fn" type="number" min="1" placeholder="Number of students"></div>
+  <div class="field"><label for="ftn">Teacher name</label><input id="ftn" placeholder="Enter your name" maxlength="40"></div>
+  <div class="field"><label>Timing</label><div class="chips" id="cSlot"></div>
+    <div class="row"><input id="ffr" type="time" aria-label="From time" class="tm"><input id="fto" type="time" aria-label="To time" class="tm"></div></div>
+  <div class="field"><label>Tuition days</label><div class="chips" id="cDay"></div></div>
+  <button class="btn teal" onclick="saveRoom()">Save</button>
+</section>
+
+<section class="screen" id="s6">
+  <div class="top"><button class="ib" onclick="show('s9')" aria-label="Back">&#8592;</button><h2>Attendance</h2></div>
+  <div class="card"><h3 id="rh"></h3><div class="mut" id="rm"></div></div>
+  <div id="list"></div>
+</section>
+
+<section class="screen" id="s7">
+  <div class="top"><button class="ib" onclick="show('s5')" aria-label="Back">&#8592;</button><h2>My Child Class Rooms</h2></div>
+  <div id="prooms"></div>
+</section>
+
+<section class="screen" id="s8">
+  <div class="top"><button class="ib" onclick="show('s7')" aria-label="Back">&#8592;</button><h2 id="ch">Class Room</h2></div>
+  <div id="child"></div>
+</section>
+<section class="screen" id="s12">
+  <div class="top"><button class="ib" onclick="show(role==='P'?'s5':'s4')" aria-label="Back">&#8592;</button><h2>Daily Homework</h2></div>
+  <div id="hwForm">
+    <div class="field"><label for="hwc">Class</label><select id="hwc" class="tm"></select></div>
+    <div class="field"><label for="hwn">Write homework (optional)</label><input id="hwn" maxlength="200" placeholder="Write homework here"></div>
+    <div class="field"><label for="hwp">Homework photo</label><input id="hwp" type="file" accept="image/*" class="tm"></div>
+    <button class="btn teal" style="margin:0 0 16px" onclick="addHw()">Upload</button>
+  </div>
+  <div id="hwList"></div>
+</section>
+
+<section class="screen" id="s13">
+  <div class="top"><button class="ib" onclick="show(role==='P'?'s5':'s4')" aria-label="Back">&#8592;</button><h2 id="stt">Statements</h2></div>
+  <div id="stList"></div>
+</section>
+</div>
+
+<div class="sheet" id="sh"><div id="shc"></div></div>
+<div id="busy" style="display:none;position:fixed;inset:0;background:rgba(10,12,40,.35);align-items:center;justify-content:center;z-index:50" aria-hidden="true"><div class="spin"></div></div>
+<div class="toast" id="tt" role="status"></div>
+
+<script>
+var SB_URL = "https://wnifczkzykymsfnegqke.supabase.co", SB_KEY = "sb_publishable_xe65LC-DurI330ltpQ08MQ_tdnchrbi";
+var sb = null;
+try { sb = window.supabase.createClient(SB_URL, SB_KEY); } catch (e) {}
+var role = null, uid = null, prof = null, me = null, curRoom = -1, curChild = -1, pendingJoin = "";
+var rooms = [], sums = {}, hw = [];
+var SUBS = ["Hindi","English","Maths","Science","Social Science","Sanskrit","History","Geography","Political Science","Economics","Computer","Other"];
+var SLOTS = ["Morning","Evening","Night"];
+var DAYS = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+var WD = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"], WDF = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+var GD = {Mon:1, Tue:2, Wed:3, Thu:4, Fri:5, Sat:6, Sun:0};
+var statWho = "T", lang = "en", editIdx = -1, f = {sub:[], slot:"", days:[]};
+function $(id){ return document.getElementById(id); }
+function esc(s){
+  return String(s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]; });
+}
+function show(id){
+  var s = document.querySelectorAll(".screen");
+  for (var i = 0; i < s.length; i++) s[i].classList.remove("on");
+  $(id).classList.add("on");
+  window.scrollTo(0, 0);
+}
+function toast(m){
+  var el = $("tt");
+  el.textContent = t(m); el.classList.add("on");
+  clearTimeout(window.tmr);
+  window.tmr = setTimeout(function(){ el.classList.remove("on"); }, 2400);
+}
+function showSheet(html){ $("shc").innerHTML = html; $("sh").classList.add("on"); }
+function closeSheet(){ $("sh").classList.remove("on"); }
+$("sh").addEventListener("click", function(e){ if (e.target === this) closeSheet(); });
+function istDate(){ return new Date().toLocaleDateString("en-CA", {timeZone: "Asia/Kolkata"}); }
+function todayKey(){ return istDate(); }
+function istDow(){ return new Date(istDate() + "T00:00:00Z").getUTCDay(); }
+function todayText(){
+  var p = istDate().split("-");
+  return Number(p[2]) + "/" + Number(p[1]) + "/" + p[0] + " (" + t(WDF[istDow()]) + ")";
+}
+function yearDays(days){
+  var y = Number(istDate().slice(0, 4)), c = 0, set = {};
+  for (var i = 0; i < days.length; i++) set[GD[days[i]]] = 1;
+  for (var d = new Date(Date.UTC(y, 0, 1)); d.getUTCFullYear() === y; d.setUTCDate(d.getUTCDate() + 1)) if (set[d.getUTCDay()]) c++;
+  return c;
+}
+function cntMark(r, s, v){
+  var x = sums[r + "|" + s];
+  return x ? (v === "P" ? x.p : x.a) : 0;
+}
+function getMark(r, s){ var x = sums[r + "|" + s]; return x ? x.t : ""; }
+function fmt(t){
+  var p = t.split(":"), h = parseInt(p[0], 10), ap = h >= 12 ? "PM" : "AM";
+  h = h % 12; if (h === 0) h = 12;
+  return h + ":" + p[1] + " " + ap;
+}
+function subs(r){ return r.sub.map(function(x){ return t(x); }).join(", "); }
+function roomName(r){ return r.teacher + ", " + subs(r); }
+function isClassDay(r){ return r.days.indexOf(WD[istDow()]) > -1; }
+function roomInfo(r){
+  return r.days.map(function(x){ return t(x); }).join(", ") + ", " + t(r.slot) + " " + t("{a} to {b}", {a: fmt(r.from), b: fmt(r.to)}) + ", " + t("{a}/{b} students", {a: r.size, b: r.n});
+}
+function idxOf(id){
+  for (var i = 0; i < rooms.length; i++) if (rooms[i].id === id) return i;
+  return -1;
+}
+function telLink(num, label){
+  var n = String(num || "").replace(/[^0-9+]/g, "");
+  if (!n) return "<button class='call' onclick=\"toast('Number not available')\">" + label + "</button>";
+  return "<a class='call' style='text-decoration:none;display:inline-block;text-align:center' href='tel:" + n + "'>" + label + "</a>";
+}
+/* ---------- start, signup, settings ---------- */
+function pick(r){
+  role = r;
+  $("rT").classList.toggle("sel", r === "T");
+  $("rP").classList.toggle("sel", r === "P");
+}
+function goRole(){
+  if (!role) { toast("Please choose Teacher or Parent"); return; }
+  show(role === "T" ? "s2" : "s3");
+}
+function eye(id){ var x = $(id); x.type = x.type === "password" ? "text" : "password"; }
+function bad(msg){ toast(msg); return false; }
+function checkCommon(g, p, ph){
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test($(g).value.trim())) return bad("Enter a valid Gmail");
+  if ($(p).value.length < 6) return bad("Password must be at least 6 characters");
+  if ($(ph).value.replace(/\D/g, "").length < 10) return bad("Enter a valid phone number");
+  return true;
+}
+async function goDash(r){
+  var tn = $("tn").value.trim(), pn = $("pn").value.trim(), ps = $("ps").value.trim();
+  if (r === "T") {
+    if (!tn) return bad("Enter your name");
+    if (!checkCommon("tg", "tp", "tph")) return;
+  } else {
+    if (!checkCommon("pg", "pp", "pph")) return;
+    if (!pn) return bad("Enter the parent name");
+    if (!ps) return bad("Enter the student name");
+  }
+  var em = (r === "T" ? $("tg") : $("pg")).value.trim(), pw = (r === "T" ? $("tp") : $("pp")).value;
+  var meta = r === "T" ? {role: "teacher", full_name: tn, phone: $("tph").value.trim()} : {role: "parent", full_name: pn, phone: $("pph").value.trim(), student_name: ps};
+  await run(async function(){
+    var res = await sb.auth.signUp({email: em, password: pw, options: {data: meta}});
+    if (res.error) throw res.error;
+    if (!res.data.session) { toast("Account created. Please check your email to verify it, then log in."); $("lgE").value = em; show("s14"); return; }
+    await enter(res.data.user.id);
+  });
+}
+function resetState(){
+  role = null; uid = null; prof = null; me = null; rooms = []; sums = {}; hw = []; curRoom = -1; curChild = -1;
+  var x = document.querySelectorAll("#s2 input, #s3 input, #s14 input");
+  for (var i = 0; i < x.length; i++) x[i].value = "";
+  pick(null);
+}
+async function logout(){
+  closeSheet();
+  await run(async function(){ await sb.auth.signOut(); });
+  resetState();
+  show("s1");
+}
+function askDeleteAccount(){
+  showSheet("<h3 style='margin:0 0 8px'>" + t("Delete your account and all its data permanently?") + "</h3><p class='mut'>" + t("This cannot be undone.") + "</p><button onclick='doDeleteAccount()' style='color:var(--coral)'>" + t("Yes, delete my account") + "</button><button onclick='closeSheet()'>" + t("No, keep") + "</button>");
+}
+async function doDeleteAccount(){
+  var ok = await run(async function(){
+    var x = await sb.rpc("delete_my_account");
+    if (x.error) throw x.error;
+    try { await sb.auth.signOut(); } catch (e) {}
+    return true;
+  });
+  closeSheet();
+  if (ok) { resetState(); show("s1"); toast("Account deleted"); }
+}
+var KNOWN = ["This code is not valid", "You have already joined this class room", "This class room is full", "Attendance can only be marked on tuition days", "Number of students cannot be less than students already joined"];
+function busy(on){ $("busy").style.display = on ? "flex" : "none"; }
+function fail(e){
+  var m = e && e.message ? e.message : "";
+  if (window.console) console.error(e);
+  if (KNOWN.indexOf(m) > -1) return toast(m);
+  if (/invalid login/i.test(m)) return toast("Wrong email or password");
+  if (/already registered/i.test(m)) return toast("This email is already registered");
+  if (/not confirmed/i.test(m)) return toast("Please verify your email first");
+  if (/rate limit|too many/i.test(m)) return toast("Too many attempts. Please try again later.");
+  toast(navigator.onLine ? "Something went wrong. Please try again." : "No internet connection");
+}
+var busyCount = 0, recovering = /type=recovery/.test(location.hash);
+async function run(fn){
+  busyCount++; busy(true);
+  try { return await fn(); }
+  catch (e) { fail(e); }
+  finally { busyCount--; if (!busyCount) busy(false); }
+}
+async function loadHw(){
+  var h = await sb.from("homework").select("classroom_id, note, image_path, created_at").order("created_at", {ascending: false}).limit(50);
+  if (h.error) throw h.error;
+  var paths = h.data.filter(function(x){ return x.image_path; }).map(function(x){ return x.image_path; }), urls = {};
+  if (paths.length) {
+    var u = await sb.storage.from("homework").createSignedUrls(paths, 3600);
+    if (!u.error) u.data.forEach(function(y){ if (y.signedUrl) urls[y.path] = y.signedUrl; });
+  }
+  hw = h.data.map(function(x){
+    var i = idxOf(x.classroom_id);
+    return {room: i > -1 ? roomName(rooms[i]) : "", note: x.note || "", img: urls[x.image_path] || "", date: new Date(x.created_at).toLocaleDateString("en-IN")};
+  });
+}
+function mapRoom(c){
+  return {id: c.id, teacher: c.teacher_name, tphone: (c.teacher && c.teacher.phone) || "", sub: c.subjects, n: c.max_students, slot: c.slot, from: String(c.start_time).slice(0, 5), to: String(c.end_time).slice(0, 5),
+    days: DAYS.filter(function(d){ return c.days.indexOf(d) > -1; }), code: c.join_code, size: 0, students: []};
+}
+async function loadAll(){
+  var q = await sb.from("classrooms").select("*, teacher:profiles!classrooms_teacher_id_fkey(phone)").order("created_at");
+  if (q.error) throw q.error;
+  rooms = q.data.map(mapRoom);
+  var e = await sb.from("enrollments").select("classroom_id, students(id, name), parent:profiles!enrollments_parent_id_fkey(full_name, phone)").order("joined_at");
+  if (e.error) throw e.error;
+  e.data.forEach(function(x){
+    var i = idxOf(x.classroom_id);
+    if (i > -1 && x.students) rooms[i].students.push({id: x.students.id, name: x.students.name, parent: x.parent ? x.parent.full_name : "", phone: x.parent ? (x.parent.phone || "") : ""});
+  });
+  var z = await sb.rpc("my_class_sizes");
+  if (z.error) throw z.error;
+  z.data.forEach(function(x){ var i = idxOf(x.classroom_id); if (i > -1) rooms[i].size = Number(x.size); });
+  var s = await sb.rpc("my_attendance_summary", {p_year: Number(istDate().slice(0, 4))});
+  if (s.error) throw s.error;
+  sums = {};
+  s.data.forEach(function(x){ sums[x.classroom_id + "|" + x.student_id] = {p: x.present, a: x.absent, t: x.today === "present" ? "P" : x.today === "absent" ? "A" : ""}; });
+  await loadHw();
+}
+async function enter(id){
+  uid = id;
+  var p = await sb.from("profiles").select("*").eq("id", uid).single();
+  if (p.error) throw p.error;
+  prof = p.data; role = prof.role === "teacher" ? "T" : "P";
+  if (role === "P") {
+    var s = await sb.from("students").select("id, name").eq("parent_id", uid).order("created_at").limit(1);
+    if (s.error) throw s.error;
+    me = s.data[0] ? {id: s.data[0].id, name: s.data[0].name, parent: prof.full_name, phone: prof.phone || ""} : null;
+  }
+  await loadAll();
+  $(role === "T" ? "hnT" : "hnP").textContent = prof.full_name;
+  renderRooms(); renderParentRooms();
+  if (role === "P" && pendingJoin) { $("jl").value = pendingJoin; pendingJoin = ""; history.replaceState(null, "", location.pathname); show("s11"); return; }
+  show(role === "T" ? "s4" : "s5");
+}
+async function doLogin(){
+  var em = $("lgE").value.trim(), pw = $("lgP").value;
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) return toast("Enter a valid Gmail");
+  if (!pw) return toast("Password must be at least 6 characters");
+  await run(async function(){
+    var r = await sb.auth.signInWithPassword({email: em, password: pw});
+    if (r.error) throw r.error;
+    $("lgP").value = "";
+    await enter(r.data.user.id);
+  });
+}
+async function forgot(){
+  var em = $("lgE").value.trim();
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) return toast("Enter a valid Gmail");
+  await run(async function(){
+    var r = await sb.auth.resetPasswordForEmail(em, {redirectTo: location.origin + location.pathname});
+    if (r.error) throw r.error;
+    toast("Password reset link sent. Please check your email.");
+  });
+}
+async function saveNewPassword(){
+  var pw = $("np1").value;
+  if (pw.length < 6) return toast("Password must be at least 6 characters");
+  var ok = await run(async function(){
+    var r = await sb.auth.updateUser({password: pw});
+    if (r.error) throw r.error;
+    recovering = false;
+    $("np1").value = "";
+    history.replaceState(null, "", location.pathname);
+    await enter(r.data.user.id);
+    return true;
+  });
+  if (ok) toast("Password updated");
+}
+async function openRooms(){
+  var ok = await run(async function(){ await loadAll(); return true; });
+  if (!ok) return;
+  renderRooms(); show("s9");
+}
+async function openParentRooms(){
+  var ok = await run(async function(){ await loadAll(); return true; });
+  if (!ok) return;
+  renderParentRooms(); show("s7");
+}
+async function boot(){
+  var hm = location.hash.match(/^#join=([A-Za-z0-9]{8})$/);
+  if (hm) pendingJoin = hm[1].toUpperCase();
+  if (!sb) { toast("No internet connection"); return; }
+  await run(async function(){
+    var s = await sb.auth.getSession();
+    if (s.data.session) {
+      if (recovering) { show("s15"); return; }
+      await enter(s.data.session.user.id);
+    }
+  });
+}
+function langSheet(){
+  var h = "<h3 style='margin:0 0 8px'>" + t("Language") + "</h3>";
+  for (var i = 0; i < LANGS.length; i++) h += "<button onclick=\"setLang('" + LANGS[i][0] + "')\">" + LANGS[i][1] + (LANGS[i][0] === lang ? " &#10003;" : "") + "</button>";
+  showSheet(h);
+}
+function openLang(){ langSheet(); }
+function openSet(){
+  showSheet("<h3 style='margin:0 0 8px'>" + t("Settings") + "</h3><button onclick='langSheet()'>" + t("Change language") + "</button><button onclick='phoneSheet()'>" + t("Change phone number") + "</button><button onclick='window.open(\"privacy.html\", \"_blank\")'>" + t("Privacy policy") + "</button><button onclick='logout()'>" + t("Log out") + "</button><button onclick='askDeleteAccount()' style='color:var(--coral)'>" + t("Delete account") + "</button>");
+}
+function phoneSheet(){
+  showSheet("<h3 style='margin:0 0 8px'>" + t("Change phone number") + "</h3><div class='field'><input id='np' type='tel' aria-label='" + t("Phone number") + "' value='" + esc(prof ? prof.phone || "" : "") + "'></div><button onclick='savePhone()'>" + t("Save") + "</button>");
+}
+async function savePhone(){
+  var v = $("np").value.trim();
+  if (v.replace(/\D/g, "").length < 10) { toast("Enter a valid phone number"); return; }
+  var ok = await run(async function(){
+    var x = await sb.from("profiles").update({phone: v}).eq("id", uid);
+    if (x.error) throw x.error;
+    prof.phone = v; if (me) me.phone = v;
+    await loadAll();
+    return true;
+  });
+  if (ok) { closeSheet(); toast("Phone number updated"); }
+}
+/* ---------- teacher: class rooms ---------- */
+function chipRow(id, list, key, single){
+  var h = "";
+  for (var i = 0; i < list.length; i++) {
+    var on = single ? f[key] === list[i] : f[key].indexOf(list[i]) > -1;
+    h += "<button class='chip " + (on ? "on" : "") + "' onclick=\"pickChip('" + key + "','" + list[i] + "'," + (single ? 1 : 0) + ")\">" + t(list[i]) + "</button>";
+  }
+  $(id).innerHTML = h;
+}
+function drawChips(){
+  chipRow("cSub", SUBS, "sub", false);
+  chipRow("cSlot", SLOTS, "slot", true);
+  chipRow("cDay", DAYS, "days", false);
+}
+function pickChip(key, v, single){
+  if (single) f[key] = v;
+  else { var i = f[key].indexOf(v); if (i > -1) f[key].splice(i, 1); else f[key].push(v); }
+  drawChips();
+}
+function openAdd(){
+  editIdx = -1;
+  f = {sub:[], slot:"", days:[]};
+  $("fn").value = "";
+  $("ftn").value = prof ? prof.full_name : "";
+  $("ffr").value = "";
+  $("fto").value = "";
+  $("ft").textContent = t("Add Class Room");
+  drawChips();
+  show("s10");
+}
+function editRoom(i){
+  closeSheet();
+  var r = rooms[i];
+  editIdx = i;
+  f = {sub:r.sub.slice(), slot:r.slot, days:r.days.slice()};
+  $("fn").value = r.n;
+  $("ftn").value = r.teacher;
+  $("ffr").value = r.from;
+  $("fto").value = r.to;
+  $("ft").textContent = t("Edit Class Room");
+  drawChips();
+  show("s10");
+}
+async function saveRoom(){
+  var n = parseInt($("fn").value, 10), fr = $("ffr").value, to = $("fto").value, tname = $("ftn").value.trim();
+  if (!tname) return toast("Enter the teacher name");
+  if (!f.sub.length) return toast("Select at least one subject");
+  if (!n || n < 1) return toast("Enter the number of students");
+  if (!f.slot || !fr || !to) return toast("Choose the timing and from-to time");
+  if (!f.days.length) return toast("Select the tuition days");
+  var p = {teacher_name: tname, subjects: f.sub.slice(), max_students: n, slot: f.slot, start_time: fr, end_time: to, days: f.days.slice()};
+  var wasEdit = editIdx > -1;
+  var ok = await run(async function(){
+    var x = wasEdit ? await sb.from("classrooms").update(p).eq("id", rooms[editIdx].id) : await sb.from("classrooms").insert(Object.assign({teacher_id: uid}, p));
+    if (x.error) throw x.error;
+    await loadAll();
+    return true;
+  });
+  if (ok) { renderRooms(); show("s9"); toast(wasEdit ? "Class room updated" : "Class room created"); }
+}
+function renderRooms(){
+  var h = rooms.length ? "" : "<div class='empty'>" + t("No class rooms yet. Tap Add Class Room below.") + "</div>";
+  for (var i = 0; i < rooms.length; i++) {
+    h += "<div class='card rc'><button class='main' onclick='openRoom(" + i + ")'><h3>" + esc(subs(rooms[i])) + "</h3><div class='mut'>" + t("Teacher:") + " " + esc(rooms[i].teacher) + "<br>" + esc(roomInfo(rooms[i])) + "<br>" + t("Class code:") + " " + esc(rooms[i].code) + "</div></button>" +
+      "<button class='dots' aria-label='" + t("Options") + "' onclick='roomMenu(" + i + ")'>&#8942;</button></div>";
+  }
+  $("rooms").innerHTML = h;
+}
+function roomMenu(i){
+  showSheet("<h3 style='margin:0 0 8px'>" + esc(subs(rooms[i])) + "</h3>" +
+    "<button onclick='editRoom(" + i + ")'>" + t("Edit") + "</button><button onclick='askDelete(" + i + ")'>" + t("Delete") + "</button>" +
+    "<button onclick='showCode(" + i + ")'>" + t("Class code") + "</button><button onclick='deleteParents(" + i + ")'>" + t("Delete parents") + "</button>");
+}
+function askDelete(i){
+  showSheet("<h3 style='margin:0 0 8px'>" + t("Delete this class room?") + "</h3><button onclick='delRoom(" + i + ")'>" + t("Yes, delete") + "</button><button onclick='closeSheet()'>" + t("No, keep") + "</button>");
+}
+async function delRoom(i){
+  var id = rooms[i].id;
+  var ok = await run(async function(){
+    var x = await sb.from("classrooms").delete().eq("id", id);
+    if (x.error) throw x.error;
+    await loadAll();
+    return true;
+  });
+  closeSheet();
+  if (ok) { renderRooms(); toast("Class room deleted"); }
+}
+function copyLink(i){
+  var link = location.origin + location.pathname + "#join=" + rooms[i].code;
+  closeSheet();
+  try { navigator.clipboard.writeText(link); } catch (e) {}
+  toast("Link copied");
+}
+function deleteParents(i){
+  var r = rooms[i], h = "<h3 style='margin:0 0 8px'>" + t("Delete parents") + "</h3>";
+  if (!r.students.length) h += "<p class='mut'>" + t("There are no parents in this class yet.") + "</p>";
+  for (var k = 0; k < r.students.length; k++) h += "<button onclick='askRemove(" + i + "," + k + ")'>" + esc(r.students[k].parent) + " (" + esc(r.students[k].name) + ")</button>";
+  showSheet(h);
+}
+function askRemove(i, k){
+  showSheet("<h3 style='margin:0 0 8px'>" + t("Remove {name} from this class?", {name: esc(rooms[i].students[k].parent)}) + "</h3><button onclick='removeParent(" + i + "," + k + ")'>" + t("Yes, remove") + "</button><button onclick='closeSheet()'>" + t("No, keep") + "</button>");
+}
+async function removeParent(i, k){
+  var r = rooms[i], st = r.students[k];
+  var ok = await run(async function(){
+    var x = await sb.from("enrollments").delete().eq("classroom_id", r.id).eq("student_id", st.id);
+    if (x.error) throw x.error;
+    await loadAll();
+    return true;
+  });
+  closeSheet();
+  if (ok) { renderRooms(); toast("Parent removed"); }
+}
+/* ---------- teacher: attendance ---------- */
+async function openRoom(i){
+  var id = rooms[i].id;
+  var ok = await run(async function(){ await loadAll(); return true; });
+  if (!ok) return;
+  curRoom = idxOf(id);
+  if (curRoom < 0) return;
+  $("rh").textContent = subs(rooms[curRoom]);
+  $("rm").textContent = roomInfo(rooms[curRoom]);
+  renderAtt();
+  show("s6");
+}
+function renderAtt(){
+  var r = rooms[curRoom], ok = isClassDay(r);
+  var h = "<p class='mut' style='margin:0 0 10px'>" + t("Today:") + " " + todayText() + "</p>";
+  if (!ok) h += "<div class='card' style='padding:10px 14px'><span class='mut'>" + t("Today is not a tuition day for this class.") + "</span></div>";
+  if (!r.students.length) h += "<div class='empty'>" + t("No students in this class yet. Send the class code to parents.") + "</div>";
+  for (var i = 0; i < r.students.length; i++) {
+    var st = r.students[i], m = getMark(r.id, st.id), d = ok ? "" : " disabled";
+    h += "<div class='card'><h3>" + (i + 1) + ". " + esc(st.name) + "</h3>" +
+      "<div class='mut'>" + t("Parent:") + " " + esc(st.parent) + "<br>" + t("Phone:") + " " + esc(st.phone) + "<br>" + t("Total attendance:") + " " + cntMark(r.id, st.id, "P") + " / " + yearDays(r.days) + "</div>" +
+      "<div class='row'><button" + d + " class='pa p " + (m === "P" ? "on" : "") + "' onclick=\"mark(" + i + ",'P')\">" + t("Present") + "</button>" +
+      "<button" + d + " class='pa a " + (m === "A" ? "on" : "") + "' onclick=\"mark(" + i + ",'A')\">" + t("Absent") + "</button>" +
+      telLink(st.phone, t("Call")) + "</div></div>";
+  }
+  $("list").innerHTML = h;
+}
+async function mark(i, v){
+  var r = rooms[curRoom], st = r.students[i];
+  if (!isClassDay(r)) return toast("Attendance can only be marked on tuition days");
+  var ok = await run(async function(){
+    var x = await sb.rpc("mark_attendance", {p_classroom: r.id, p_student: st.id, p_status: v === "P" ? "present" : "absent"});
+    if (x.error) throw x.error;
+    return true;
+  });
+  if (!ok) return;
+  var k = r.id + "|" + st.id, s = sums[k] || (sums[k] = {p: 0, a: 0, t: ""});
+  if (s.t === "P") s.p--; else if (s.t === "A") s.a--;
+  if (v === "P") s.p++; else s.a++;
+  s.t = v;
+  renderAtt();
+  toast("Attendance saved");
+}
+/* ---------- parent ---------- */
+function myRooms(){
+  var out = [];
+  if (!me) return out;
+  for (var i = 0; i < rooms.length; i++) for (var k = 0; k < rooms[i].students.length; k++) if (rooms[i].students[k].id === me.id) { out.push(i); break; }
+  return out;
+}
+function renderParentRooms(){
+  var m = myRooms(), h = m.length ? "" : "<div class='empty'>" + t("You have not joined any class room yet. Enter the teacher's code in Connect Class Rooms.") + "</div>";
+  for (var k = 0; k < m.length; k++) {
+    var i = m[k], r = rooms[i];
+    h += "<div class='card rc'><button class='main' onclick='openChild(" + i + ")'><h3>" + esc(roomName(r)) + "</h3><div class='mut'>" + esc(roomInfo(r)) + "</div></button><button class='dots' aria-label='" + t("Options") + "' onclick='parentMenu(" + i + ")'>&#8942;</button></div>";
+  }
+  $("prooms").innerHTML = h;
+}
+async function openChild(i){
+  var id = rooms[i].id;
+  var ok = await run(async function(){ await loadAll(); return true; });
+  if (!ok) return;
+  i = idxOf(id);
+  if (i < 0) return;
+  curChild = i;
+  $("ch").textContent = rooms[i].teacher;
+  var r = rooms[i], m = getMark(r.id, me.id);
+  var badge = m === "P" ? "<span class='badge P'>" + t("Present") + "</span>" : m === "A" ? "<span class='badge A'>" + t("Absent") + "</span>" : "<span class='badge'>" + t("No update today yet") + "</span>";
+  $("child").innerHTML = "<div class='card'><h3>" + esc(me.name) + "</h3><div style='margin-top:6px'>" + badge + "</div>" +
+    "<div class='mut' style='margin-top:8px'>" + esc(roomName(r)) + "</div>" +
+    "<div class='stat'><div><span class='mut'>" + t("Total tuition days") + "</span><b>" + yearDays(r.days) + "</b></div><div><span class='mut'>" + t("Present days") + "</span><b>" + cntMark(r.id, me.id, "P") + "</b></div></div>" +
+    "<div class='row'>" + telLink(r.tphone, t("Call teacher")) + "</div></div>";
+  show("s8");
+}
+function parentMenu(i){
+  showSheet("<h3 style='margin:0 0 8px'>" + esc(roomName(rooms[i])) + "</h3><button onclick='exitAsk(" + i + ")'>" + t("Exit") + "</button><button onclick='showCode(" + i + ")'>" + t("Class code") + "</button><button onclick='roomDetails(" + i + ")'>" + t("Details") + "</button>");
+}
+function exitAsk(i){
+  showSheet("<h3 style='margin:0 0 8px'>" + t("Leave this class room?") + "</h3><p class='mut'>" + t("This class room will be removed from your account. You will need the teacher's code to join again.") + "</p><button onclick='doExit(" + i + ")'>" + t("Yes, leave") + "</button><button onclick='closeSheet()'>" + t("No, keep") + "</button>");
+}
+async function doExit(i){
+  var r = rooms[i];
+  var ok = await run(async function(){
+    var x = await sb.from("enrollments").delete().eq("classroom_id", r.id).eq("student_id", me.id);
+    if (x.error) throw x.error;
+    await loadAll();
+    return true;
+  });
+  closeSheet();
+  if (ok) { renderParentRooms(); toast("You left the class room"); }
+}
+function roomDetails(i){
+  var r = rooms[i];
+  showSheet("<h3 style='margin:0 0 8px'>" + t("Details") + "</h3>" +
+    "<p style='margin:6px 0'><b>" + t("Teacher:") + "</b> " + esc(r.teacher) + "</p><p style='margin:6px 0'><b>" + t("Subjects:") + "</b> " + esc(subs(r)) + "</p>" +
+    "<p style='margin:6px 0'><b>" + t("Days:") + "</b> " + esc(r.days.map(function(x){ return t(x); }).join(", ")) + "</p><p style='margin:6px 0'><b>" + t("Time:") + "</b> " + esc(t(r.slot) + " " + t("{a} to {b}", {a: fmt(r.from), b: fmt(r.to)})) + "</p>" +
+    "<p style='margin:6px 0'><b>" + t("Total students:") + "</b> " + t("{a} (limit {b})", {a: r.size, b: r.n}) + "</p><button onclick='closeSheet()'>" + t("Close") + "</button>");
+}
+async function joinRoom(){
+  var v = $("jl").value.replace(/\s/g, "").toUpperCase();
+  if (!v) return toast("Enter the class code first");
+  if (!/^[A-Z0-9]{8}$/.test(v) || !me) return toast("This code is not valid");
+  var ok = await run(async function(){
+    var x = await sb.rpc("join_classroom", {p_code: v, p_student: me.id});
+    if (x.error) throw x.error;
+    await loadAll();
+    return true;
+  });
+  if (!ok) return;
+  $("jl").value = "";
+  renderParentRooms();
+  show("s7");
+  toast("Class room joined");
+}
+function showCode(i){
+  showSheet("<h3 style='margin:0 0 8px'>" + t("Class code") + "</h3><div style='font:800 32px/1.2 ui-monospace,Menlo,Consolas,monospace;letter-spacing:.18em;text-align:center;padding:14px 0;color:var(--violet)'>" + esc(rooms[i].code) + "</div><p class='mut'>" + t("Share this code with parents. They enter it in Connect Class Rooms.") + "</p><button onclick='copyCode(" + i + ")'>" + t("Copy code") + "</button><button onclick='closeSheet()'>" + t("Close") + "</button>");
+}
+function copyCode(i){
+  closeSheet();
+  try { navigator.clipboard.writeText(rooms[i].code); } catch (e) {}
+  toast("Code copied");
+}
+/* ---------- homework ---------- */
+async function openHw(){
+  var ok = await run(async function(){ await loadAll(); return true; });
+  if (!ok) return;
+  $("hwForm").style.display = role === "P" ? "none" : "block";
+  var o = "";
+  for (var i = 0; i < rooms.length; i++) o += "<option value='" + i + "'>" + esc(roomName(rooms[i])) + "</option>";
+  $("hwc").innerHTML = o || "<option value=''>" + t("Create a class room first") + "</option>";
+  renderHw();
+  show("s12");
+}
+function compress(file){
+  return new Promise(function(res, rej){
+    var img = new Image(), u = URL.createObjectURL(file);
+    img.onload = function(){
+      var k = Math.min(1, 1280 / Math.max(img.width, img.height)), c = document.createElement("canvas");
+      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(u);
+      c.toBlob(function(b){ b ? res(b) : rej(new Error("compress")); }, "image/jpeg", 0.8);
+    };
+    img.onerror = function(){ rej(new Error("image")); };
+    img.src = u;
+  });
+}
+async function addHw(){
+  var s = $("hwc").value, file = $("hwp").files[0], note = $("hwn").value.trim();
+  if (s === "" || !rooms[+s]) return toast("Create a class room first");
+  if (!file && !note) return toast("Add a photo or write homework");
+  if (file && file.type.indexOf("image/") !== 0) return toast("Please choose a photo only");
+  var r = rooms[+s];
+  var ok = await run(async function(){
+    var path = null;
+    if (file) {
+      var blob;
+      try { blob = await compress(file); } catch (e) { toast("Photo could not be uploaded"); return false; }
+      path = r.id + "/" + (window.crypto && crypto.randomUUID ? crypto.randomUUID() : String(Date.now())) + ".jpg";
+      var up = await sb.storage.from("homework").upload(path, blob, {contentType: "image/jpeg"});
+      if (up.error) throw up.error;
+    }
+    var x = await sb.from("homework").insert({classroom_id: r.id, note: note || null, image_path: path});
+    if (x.error) throw x.error;
+    await loadAll();
+    return true;
+  });
+  if (!ok) return;
+  $("hwn").value = ""; $("hwp").value = "";
+  renderHw();
+  toast("Homework uploaded");
+}
+function renderHw(){
+  var h = "";
+  for (var i = 0; i < hw.length; i++) {
+    var x = hw[i];
+    h += "<div class='card'><h3>" + esc(x.room) + "</h3><div class='mut'>" + esc(x.date) + "</div>" + (x.note ? "<p style='margin:8px 0 0'>" + esc(x.note) + "</p>" : "") + (x.img ? "<img class='hwimg' alt='" + t("Homework photo") + "' src='" + esc(x.img) + "'>" : "") + "</div>";
+  }
+  if (!hw.length) h = "<div class='empty'>" + t("No homework yet.") + "</div>";
+  $("hwList").innerHTML = h;
+}
+/* ---------- statements ---------- */
+function stCard(name, sub, r, st){
+  var p = cntMark(r.id, st.id, "P"), a = cntMark(r.id, st.id, "A");
+  return "<div class='card'><h3>" + esc(name) + "</h3><div class='mut'>" + sub + "</div>" +
+    "<div class='stat'><div><span class='mut'>" + t("Total tuition days") + "</span><b>" + yearDays(r.days) + "</b></div><div><span class='mut'>" + t("Present days") + "</span><b>" + p + "</b></div><div><span class='mut'>" + t("Absent days") + "</span><b>" + a + "</b></div></div></div>";
+}
+async function openStat(who){
+  var ok = await run(async function(){ await loadAll(); return true; });
+  if (!ok) return;
+  statWho = who;
+  var h = "", c = 0;
+  if (who === "T") {
+    $("stt").textContent = t("All Student Statements");
+    for (var i = 0; i < rooms.length; i++) for (var k = 0; k < rooms[i].students.length; k++) {
+      var st = rooms[i].students[k]; c++;
+      h += stCard(st.name, t("Parent:") + " " + esc(st.parent) + "<br>" + esc(subs(rooms[i])), rooms[i], st);
+    }
+  } else {
+    $("stt").textContent = t("My Child Statements");
+    var m = myRooms();
+    for (var j = 0; j < m.length; j++) { c++; h += stCard(me.name, esc(roomName(rooms[m[j]])), rooms[m[j]], me); }
+  }
+  if (!c) h = "<div class='empty'>" + t("No records yet.") + "</div>";
+  $("stList").innerHTML = h;
+  show("s13");
+}
+/* ---------- language ---------- */
+var LANGS = [["en", "English"], ["hi", "\u0939\u093f\u0928\u094d\u0926\u0940 (Hindi)"], ["mr", "\u092e\u0930\u093e\u0920\u0940 (Marathi)"], ["bn", "\u09ac\u09be\u0982\u09b2\u09be (Bengali)"], ["gu", "ગુજરાતી (Gujarati)"], ["ta", "தமிழ் (Tamil)"], ["te", "తెలుగు (Telugu)"]];
+var I18N = {};
+I18N["hi"]={"{a} to {b}":"{a} से {b}","Tuition Tracker":"ट्यूशन ट्रैकर","Add Class Room":"क्लास रूम जोड़ें","Add Class Rooms":"क्लास रूम जोड़ें","All Student Statements":"सभी छात्रों का विवरण","Create your account":"अपना खाता बनाएँ","As a Parent":"अभिभावक के रूप में","As a Tuition Teacher":"ट्यूशन शिक्षक के रूप में","Attendance":"उपस्थिति","Class":"कक्षा","Class Room":"क्लास रूम","Class room link":"क्लास रूम का लिंक","Connect Class Rooms":"क्लास रूम से जुड़ें","Continue":"आगे बढ़ें","Daily Homework":"दैनिक होमवर्क","Daily Homeworks":"दैनिक होमवर्क","Dashboard":"डैशबोर्ड","Gmail":"जीमेल","Hello,":"नमस्ते,","Homework photo":"होमवर्क की फोटो","Write homework (optional)":"होमवर्क लिखें (वैकल्पिक)","I am your Tuition Study Tracker":"मैं आपका ट्यूशन स्टडी ट्रैकर हूँ","Join":"जुड़ें","Number of students":"बच्चों की संख्या","Language":"भाषा","Make in India":"मेक इन इंडिया","My Child Class Rooms":"मेरे बच्चे के क्लास रूम","My Child Statements":"मेरे बच्चे का विवरण","My Class Rooms":"मेरे क्लास रूम","Parent":"अभिभावक","Parent name":"अभिभावक का नाम","Password":"पासवर्ड","Phone number":"फ़ोन नंबर","Save":"सेव करें","Statements":"विवरण","Student name":"छात्र का नाम","Subjects (select one or more)":"विषय (एक या अधिक चुनें)","Teacher":"शिक्षक","Paste the link sent by your teacher":"शिक्षक द्वारा भेजा गया लिंक यहाँ पेस्ट करें","Teacher name":"शिक्षक का नाम","Timing":"समय","Tuition days":"ट्यूशन के दिन","Upload":"अपलोड करें","Your name":"आपका नाम","Back":"वापस","From time":"शुरू होने का समय","Settings":"सेटिंग्स","Show password":"पासवर्ड दिखाएँ","To time":"समाप्ति का समय","Enter your name":"अपना नाम लिखें","Enter parent name":"अभिभावक का नाम लिखें","Enter phone number":"फ़ोन नंबर लिखें","Enter student name":"छात्र का नाम लिखें","Enter your Gmail":"अपना जीमेल लिखें","Write homework here":"होमवर्क यहाँ लिखें","Paste link here":"लिंक यहाँ पेस्ट करें","Set a password":"पासवर्ड बनाएँ","Please choose Teacher or Parent":"कृपया शिक्षक या अभिभावक चुनें","Enter a valid Gmail":"सही जीमेल लिखें","Password must be at least 6 characters":"पासवर्ड कम से कम 6 अक्षर का रखें","Enter a valid phone number":"सही फ़ोन नंबर लिखें","Enter the parent name":"अभिभावक का नाम लिखें","Enter the student name":"छात्र का नाम लिखें","Enter the teacher name":"शिक्षक का नाम लिखें","Select at least one subject":"कम से कम एक विषय चुनें","Enter the number of students":"बच्चों की संख्या लिखें","Choose the timing and from-to time":"समय और शुरू-समाप्ति का समय चुनें","Select the tuition days":"ट्यूशन के दिन चुनें","Number of students cannot be less than students already joined":"बच्चों की संख्या जुड़े हुए बच्चों से कम नहीं हो सकती","Class room updated":"क्लास रूम अपडेट हो गया","Class room created":"क्लास रूम बन गया","Class room deleted":"क्लास रूम हटा दिया गया","Link copied":"लिंक कॉपी हो गया","Parent removed":"अभिभावक हटा दिया गया","Notification sent to parent":"अभिभावक को सूचना भेज दी गई","You left the class room":"आप क्लास रूम से बाहर आ गए","Paste the link first":"पहले लिंक पेस्ट करें","This link is not valid":"यह लिंक सही नहीं है","You have already joined this class room":"आप इस क्लास रूम से पहले ही जुड़ चुके हैं","This class room is full":"यह क्लास रूम भर चुका है","Class room joined":"क्लास रूम से जुड़ गए","Create a class room first":"पहले क्लास रूम बनाएँ","Add a photo or write homework":"फोटो जोड़ें या होमवर्क लिखें","Please choose a photo only":"कृपया केवल फोटो चुनें","Homework uploaded":"होमवर्क अपलोड हो गया","Phone number updated":"फ़ोन नंबर बदल गया","Number not available":"नंबर उपलब्ध नहीं है","Attendance can only be marked on tuition days":"उपस्थिति केवल ट्यूशन के दिनों में ही लगाई जा सकती है","Change language":"भाषा बदलें","Change phone number":"फ़ोन नंबर बदलें","Log out":"लॉग आउट","Delete parents":"अभिभावक हटाएँ","There are no parents in this class yet.":"इस क्लास में अभी कोई अभिभावक नहीं है।","Remove {name} from this class?":"{name} को इस क्लास से हटाना है?","Yes, remove":"हाँ, हटाएँ","No, keep":"नहीं, रहने दें","Edit":"बदलें","Delete":"हटाएँ","Link":"लिंक","Details":"विवरण","Delete this class room?":"यह क्लास रूम हटाना है?","Yes, delete":"हाँ, हटाएँ","Edit Class Room":"क्लास रूम बदलें","{a}/{b} students":"{a}/{b} बच्चे","No class rooms yet. Tap Add Class Room below.":"अभी कोई क्लास रूम नहीं है। नीचे क्लास रूम जोड़ें दबाएँ।","Teacher:":"शिक्षक:","Today:":"आज:","Parent:":"अभिभावक:","Phone:":"फ़ोन:","Total attendance:":"कुल उपस्थिति:","Present":"उपस्थित","Absent":"अनुपस्थित","Call":"कॉल करें","Today is not a tuition day for this class.":"आज इस क्लास के ट्यूशन का दिन नहीं है।","No update today yet":"आज की उपस्थिति अभी नहीं आई","Total tuition days":"कुल ट्यूशन दिन","Present days":"उपस्थित दिन","Absent days":"अनुपस्थित दिन","Call teacher":"शिक्षक को कॉल करें","Leave this class room?":"इस क्लास रूम से बाहर निकलना है?","Yes, leave":"हाँ, बाहर निकलें","Exit":"बाहर निकलें","Subjects:":"विषय:","Days:":"दिन:","Time:":"समय:","Total students:":"कुल बच्चे:","{a} (limit {b})":"{a} (सीमा {b})","Close":"बंद करें","No homework yet.":"अभी कोई होमवर्क नहीं है।","No records yet.":"अभी कोई रिकॉर्ड नहीं है।","Options":"विकल्प","Hindi":"हिन्दी","English":"अंग्रेज़ी","Maths":"गणित","Science":"विज्ञान","Social Science":"सामाजिक विज्ञान","Sanskrit":"संस्कृत","History":"इतिहास","Geography":"भूगोल","Political Science":"राजनीति विज्ञान","Economics":"अर्थशास्त्र","Computer":"कंप्यूटर","Other":"अन्य","Morning":"सुबह","Evening":"शाम","Night":"रात","Mon":"सोम","Tue":"मंगल","Wed":"बुध","Thu":"गुरु","Fri":"शुक्र","Sat":"शनि","Sun":"रवि","Sunday":"रविवार","Monday":"सोमवार","Tuesday":"मंगलवार","Wednesday":"बुधवार","Thursday":"गुरुवार","Friday":"शुक्रवार","Saturday":"शनिवार","Log in":"लॉग इन करें","Already have an account? Log in":"पहले से खाता है? लॉग इन करें","Wrong email or password":"ईमेल या पासवर्ड गलत है","This email is already registered":"यह ईमेल पहले से रजिस्टर है","Please verify your email first":"कृपया पहले अपना ईमेल वेरिफ़ाई करें","Too many attempts. Please try again later.":"बहुत ज़्यादा कोशिशें हो गईं। कृपया बाद में कोशिश करें।","Something went wrong. Please try again.":"कुछ गड़बड़ हो गई। कृपया दोबारा कोशिश करें।","No internet connection":"इंटरनेट कनेक्शन नहीं है","Account created. Please check your email to verify it, then log in.":"खाता बन गया। कृपया अपना ईमेल वेरिफ़ाई करें, फिर लॉग इन करें।","Delete account":"खाता हटाएँ","Delete your account and all its data permanently?":"अपना खाता और उसका सारा डेटा हमेशा के लिए हटाना है?","This cannot be undone.":"इसे वापस नहीं किया जा सकता।","Yes, delete my account":"हाँ, मेरा खाता हटाएँ","Account deleted":"खाता हटा दिया गया","Attendance saved":"उपस्थिति सेव हो गई","Photo could not be uploaded":"फोटो अपलोड नहीं हो सकी","Class code":"क्लास कोड","Class code:":"क्लास कोड:","Enter the class code":"क्लास कोड लिखें","Enter the code given by your teacher":"शिक्षक द्वारा दिया गया कोड लिखें","Share this code with parents. They enter it in Connect Class Rooms.":"यह कोड अभिभावकों को दें। वे इसे क्लास रूम से जुड़ें में लिखेंगे।","Copy code":"कोड कॉपी करें","Code copied":"कोड कॉपी हो गया","This code is not valid":"यह कोड सही नहीं है","Enter the class code first":"पहले क्लास कोड लिखें","Forgot password?":"पासवर्ड भूल गए?","Password reset link sent. Please check your email.":"पासवर्ड रीसेट लिंक भेज दिया गया है। कृपया अपना ईमेल देखें।","Set a new password":"नया पासवर्ड बनाएँ","New password":"नया पासवर्ड","Password updated":"पासवर्ड बदल गया","Privacy policy":"गोपनीयता नीति","No students in this class yet. Send the class code to parents.":"इस क्लास में अभी कोई बच्चा नहीं है। क्लास का कोड अभिभावकों को भेजें।","You have not joined any class room yet. Enter the teacher's code in Connect Class Rooms.":"आप अभी किसी क्लास रूम से नहीं जुड़े हैं। क्लास रूम से जुड़ें में शिक्षक का कोड लिखें।","This class room will be removed from your account. You will need the teacher's code to join again.":"यह क्लास रूम आपके खाते से हट जाएगा। दोबारा जुड़ने के लिए शिक्षक का कोड चाहिए होगा।"};
+I18N["mr"]={"{a} to {b}":"{a} ते {b}","Tuition Tracker":"ट्यूशन ट्रॅकर","Add Class Room":"क्लास रूम जोडा","Add Class Rooms":"क्लास रूम जोडा","All Student Statements":"सर्व विद्यार्थ्यांचे विवरण","Create your account":"तुमचे खाते तयार करा","As a Parent":"पालक म्हणून","As a Tuition Teacher":"ट्यूशन शिक्षक म्हणून","Attendance":"उपस्थिती","Class":"वर्ग","Class Room":"क्लास रूम","Class room link":"क्लास रूमची लिंक","Connect Class Rooms":"क्लास रूमशी जोडले जा","Continue":"पुढे जा","Daily Homework":"दैनिक गृहपाठ","Daily Homeworks":"दैनिक गृहपाठ","Dashboard":"डॅशबोर्ड","Gmail":"जीमेल","Hello,":"नमस्कार,","Homework photo":"गृहपाठाचा फोटो","Write homework (optional)":"गृहपाठ लिहा (ऐच्छिक)","I am your Tuition Study Tracker":"मी तुमचा ट्यूशन स्टडी ट्रॅकर आहे","Join":"सामील व्हा","Number of students":"विद्यार्थ्यांची संख्या","Language":"भाषा","Make in India":"मेक इन इंडिया","My Child Class Rooms":"माझ्या मुलाचे क्लास रूम","My Child Statements":"माझ्या मुलाचे विवरण","My Class Rooms":"माझे क्लास रूम","Parent":"पालक","Parent name":"पालकाचे नाव","Password":"पासवर्ड","Phone number":"फोन नंबर","Save":"सेव्ह करा","Statements":"विवरण","Student name":"विद्यार्थ्याचे नाव","Subjects (select one or more)":"विषय (एक किंवा अधिक निवडा)","Teacher":"शिक्षक","Paste the link sent by your teacher":"शिक्षकांनी पाठवलेली लिंक येथे पेस्ट करा","Teacher name":"शिक्षकाचे नाव","Timing":"वेळ","Tuition days":"ट्यूशनचे दिवस","Upload":"अपलोड करा","Your name":"तुमचे नाव","Back":"मागे","From time":"सुरू होण्याची वेळ","Settings":"सेटिंग्ज","Show password":"पासवर्ड दाखवा","To time":"संपण्याची वेळ","Enter your name":"तुमचे नाव लिहा","Enter parent name":"पालकाचे नाव लिहा","Enter phone number":"फोन नंबर लिहा","Enter student name":"विद्यार्थ्याचे नाव लिहा","Enter your Gmail":"तुमचा जीमेल लिहा","Write homework here":"गृहपाठ येथे लिहा","Paste link here":"लिंक येथे पेस्ट करा","Set a password":"पासवर्ड तयार करा","Please choose Teacher or Parent":"कृपया शिक्षक किंवा पालक निवडा","Enter a valid Gmail":"योग्य जीमेल लिहा","Password must be at least 6 characters":"पासवर्ड किमान ६ अक्षरांचा ठेवा","Enter a valid phone number":"योग्य फोन नंबर लिहा","Enter the parent name":"पालकाचे नाव लिहा","Enter the student name":"विद्यार्थ्याचे नाव लिहा","Enter the teacher name":"शिक्षकाचे नाव लिहा","Select at least one subject":"किमान एक विषय निवडा","Enter the number of students":"विद्यार्थ्यांची संख्या लिहा","Choose the timing and from-to time":"वेळ आणि सुरू-संपण्याची वेळ निवडा","Select the tuition days":"ट्यूशनचे दिवस निवडा","Number of students cannot be less than students already joined":"विद्यार्थ्यांची संख्या आधीच सामील झालेल्या विद्यार्थ्यांपेक्षा कमी असू शकत नाही","Class room updated":"क्लास रूम अपडेट झाले","Class room created":"क्लास रूम तयार झाले","Class room deleted":"क्लास रूम हटवले","Link copied":"लिंक कॉपी झाली","Parent removed":"पालक हटवले","Notification sent to parent":"पालकांना सूचना पाठवली","You left the class room":"तुम्ही क्लास रूममधून बाहेर पडलात","Paste the link first":"आधी लिंक पेस्ट करा","This link is not valid":"ही लिंक योग्य नाही","You have already joined this class room":"तुम्ही या क्लास रूममध्ये आधीच सामील आहात","This class room is full":"हे क्लास रूम भरले आहे","Class room joined":"क्लास रूममध्ये सामील झालात","Create a class room first":"आधी क्लास रूम तयार करा","Add a photo or write homework":"फोटो जोडा किंवा गृहपाठ लिहा","Please choose a photo only":"कृपया फक्त फोटो निवडा","Homework uploaded":"गृहपाठ अपलोड झाला","Phone number updated":"फोन नंबर बदलला","Number not available":"नंबर उपलब्ध नाही","Attendance can only be marked on tuition days":"उपस्थिती फक्त ट्यूशनच्या दिवशीच लावता येते","Change language":"भाषा बदला","Change phone number":"फोन नंबर बदला","Log out":"लॉग आउट","Delete parents":"पालक हटवा","There are no parents in this class yet.":"या क्लासमध्ये अजून कोणीही पालक नाही.","Remove {name} from this class?":"{name} यांना या क्लासमधून काढायचे आहे का?","Yes, remove":"हो, काढा","No, keep":"नाही, राहू द्या","Edit":"बदला","Delete":"हटवा","Link":"लिंक","Details":"तपशील","Delete this class room?":"हे क्लास रूम हटवायचे आहे का?","Yes, delete":"हो, हटवा","Edit Class Room":"क्लास रूम बदला","{a}/{b} students":"{a}/{b} विद्यार्थी","No class rooms yet. Tap Add Class Room below.":"अजून कोणतेही क्लास रूम नाही. खाली क्लास रूम जोडा दाबा.","Teacher:":"शिक्षक:","Today:":"आज:","Parent:":"पालक:","Phone:":"फोन:","Total attendance:":"एकूण उपस्थिती:","Present":"उपस्थित","Absent":"अनुपस्थित","Call":"कॉल करा","Today is not a tuition day for this class.":"आज या क्लासच्या ट्यूशनचा दिवस नाही.","No update today yet":"आजची उपस्थिती अजून आलेली नाही","Total tuition days":"एकूण ट्यूशन दिवस","Present days":"उपस्थित दिवस","Absent days":"अनुपस्थित दिवस","Call teacher":"शिक्षकांना कॉल करा","Leave this class room?":"या क्लास रूममधून बाहेर पडायचे आहे का?","Yes, leave":"हो, बाहेर पडा","Exit":"बाहेर पडा","Subjects:":"विषय:","Days:":"दिवस:","Time:":"वेळ:","Total students:":"एकूण विद्यार्थी:","{a} (limit {b})":"{a} (मर्यादा {b})","Close":"बंद करा","No homework yet.":"अजून कोणताही गृहपाठ नाही.","No records yet.":"अजून कोणतीही नोंद नाही.","Options":"पर्याय","Hindi":"हिंदी","English":"इंग्रजी","Maths":"गणित","Science":"विज्ञान","Social Science":"समाजशास्त्र","Sanskrit":"संस्कृत","History":"इतिहास","Geography":"भूगोल","Political Science":"राज्यशास्त्र","Economics":"अर्थशास्त्र","Computer":"संगणक","Other":"इतर","Morning":"सकाळ","Evening":"संध्याकाळ","Night":"रात्र","Mon":"सोम","Tue":"मंगळ","Wed":"बुध","Thu":"गुरु","Fri":"शुक्र","Sat":"शनि","Sun":"रवि","Sunday":"रविवार","Monday":"सोमवार","Tuesday":"मंगळवार","Wednesday":"बुधवार","Thursday":"गुरुवार","Friday":"शुक्रवार","Saturday":"शनिवार","Log in":"लॉग इन करा","Already have an account? Log in":"आधीच खाते आहे? लॉग इन करा","Wrong email or password":"ईमेल किंवा पासवर्ड चुकीचा आहे","This email is already registered":"हा ईमेल आधीच नोंदणीकृत आहे","Please verify your email first":"कृपया आधी तुमचा ईमेल सत्यापित करा","Too many attempts. Please try again later.":"खूप जास्त प्रयत्न झाले. कृपया नंतर पुन्हा प्रयत्न करा.","Something went wrong. Please try again.":"काहीतरी चुकले. कृपया पुन्हा प्रयत्न करा.","No internet connection":"इंटरनेट कनेक्शन नाही","Account created. Please check your email to verify it, then log in.":"खाते तयार झाले. कृपया तुमचा ईमेल सत्यापित करा, मग लॉग इन करा.","Delete account":"खाते हटवा","Delete your account and all its data permanently?":"तुमचे खाते आणि त्याचा सर्व डेटा कायमचा हटवायचा आहे का?","This cannot be undone.":"हे परत करता येणार नाही.","Yes, delete my account":"हो, माझे खाते हटवा","Account deleted":"खाते हटवले","Attendance saved":"उपस्थिती सेव्ह झाली","Photo could not be uploaded":"फोटो अपलोड होऊ शकला नाही","Class code":"क्लास कोड","Class code:":"क्लास कोड:","Enter the class code":"क्लास कोड लिहा","Enter the code given by your teacher":"शिक्षकांनी दिलेला कोड लिहा","Share this code with parents. They enter it in Connect Class Rooms.":"हा कोड पालकांना द्या. ते क्लास रूमशी जोडले जा मध्ये लिहितील.","Copy code":"कोड कॉपी करा","Code copied":"कोड कॉपी झाला","This code is not valid":"हा कोड योग्य नाही","Enter the class code first":"आधी क्लास कोड लिहा","Forgot password?":"पासवर्ड विसरलात?","Password reset link sent. Please check your email.":"पासवर्ड रीसेट लिंक पाठवली आहे. कृपया तुमचा ईमेल तपासा.","Set a new password":"नवीन पासवर्ड तयार करा","New password":"नवीन पासवर्ड","Password updated":"पासवर्ड बदलला","Privacy policy":"गोपनीयता धोरण","No students in this class yet. Send the class code to parents.":"या क्लासमध्ये अजून कोणीही विद्यार्थी नाही. क्लासचा कोड पालकांना पाठवा.","You have not joined any class room yet. Enter the teacher's code in Connect Class Rooms.":"तुम्ही अजून कोणत्याही क्लास रूममध्ये सामील झालेला नाही. क्लास रूमशी जोडले जा मध्ये शिक्षकांचा कोड लिहा.","This class room will be removed from your account. You will need the teacher's code to join again.":"हे क्लास रूम तुमच्या खात्यातून काढले जाईल. पुन्हा सामील होण्यासाठी शिक्षकांचा कोड लागेल."};
+I18N["bn"]={"{a} to {b}":"{a} থেকে {b}","Tuition Tracker":"টিউশন ট্র্যাকার","Add Class Room":"ক্লাস রুম যোগ করুন","Add Class Rooms":"ক্লাস রুম যোগ করুন","All Student Statements":"সব ছাত্রছাত্রীর বিবরণ","Create your account":"আপনার অ্যাকাউন্ট তৈরি করুন","As a Parent":"অভিভাবক হিসেবে","As a Tuition Teacher":"টিউশন শিক্ষক হিসেবে","Attendance":"উপস্থিতি","Class":"ক্লাস","Class Room":"ক্লাস রুম","Class room link":"ক্লাস রুমের লিঙ্ক","Connect Class Rooms":"ক্লাস রুমে যুক্ত হন","Continue":"এগিয়ে যান","Daily Homework":"দৈনিক হোমওয়ার্ক","Daily Homeworks":"দৈনিক হোমওয়ার্ক","Dashboard":"ড্যাশবোর্ড","Gmail":"জিমেইল","Hello,":"নমস্কার,","Homework photo":"হোমওয়ার্কের ছবি","Write homework (optional)":"হোমওয়ার্ক লিখুন (ঐচ্ছিক)","I am your Tuition Study Tracker":"আমি আপনার টিউশন স্টাডি ট্র্যাকার","Join":"যোগ দিন","Number of students":"ছাত্রছাত্রীর সংখ্যা","Language":"ভাষা","Make in India":"মেক ইন ইন্ডিয়া","My Child Class Rooms":"আমার সন্তানের ক্লাস রুম","My Child Statements":"আমার সন্তানের বিবরণ","My Class Rooms":"আমার ক্লাস রুম","Parent":"অভিভাবক","Parent name":"অভিভাবকের নাম","Password":"পাসওয়ার্ড","Phone number":"ফোন নম্বর","Save":"সেভ করুন","Statements":"বিবরণ","Student name":"ছাত্র/ছাত্রীর নাম","Subjects (select one or more)":"বিষয় (এক বা একাধিক বেছে নিন)","Teacher":"শিক্ষক","Paste the link sent by your teacher":"শিক্ষকের পাঠানো লিঙ্ক এখানে পেস্ট করুন","Teacher name":"শিক্ষকের নাম","Timing":"সময়","Tuition days":"টিউশনের দিন","Upload":"আপলোড করুন","Your name":"আপনার নাম","Back":"পিছনে","From time":"শুরুর সময়","Settings":"সেটিংস","Show password":"পাসওয়ার্ড দেখান","To time":"শেষের সময়","Enter your name":"আপনার নাম লিখুন","Enter parent name":"অভিভাবকের নাম লিখুন","Enter phone number":"ফোন নম্বর লিখুন","Enter student name":"ছাত্র/ছাত্রীর নাম লিখুন","Enter your Gmail":"আপনার জিমেইল লিখুন","Write homework here":"হোমওয়ার্ক এখানে লিখুন","Paste link here":"লিঙ্ক এখানে পেস্ট করুন","Set a password":"একটি পাসওয়ার্ড দিন","Please choose Teacher or Parent":"অনুগ্রহ করে শিক্ষক বা অভিভাবক বেছে নিন","Enter a valid Gmail":"সঠিক জিমেইল লিখুন","Password must be at least 6 characters":"পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে","Enter a valid phone number":"সঠিক ফোন নম্বর লিখুন","Enter the parent name":"অভিভাবকের নাম লিখুন","Enter the student name":"ছাত্র/ছাত্রীর নাম লিখুন","Enter the teacher name":"শিক্ষকের নাম লিখুন","Select at least one subject":"কমপক্ষে একটি বিষয় বেছে নিন","Enter the number of students":"ছাত্রছাত্রীর সংখ্যা লিখুন","Choose the timing and from-to time":"সময় এবং শুরু-শেষের সময় বেছে নিন","Select the tuition days":"টিউশনের দিন বেছে নিন","Number of students cannot be less than students already joined":"ছাত্রছাত্রীর সংখ্যা ইতিমধ্যে যুক্ত হওয়া ছাত্রছাত্রীর চেয়ে কম হতে পারে না","Class room updated":"ক্লাস রুম আপডেট হয়েছে","Class room created":"ক্লাস রুম তৈরি হয়েছে","Class room deleted":"ক্লাস রুম মুছে ফেলা হয়েছে","Link copied":"লিঙ্ক কপি হয়েছে","Parent removed":"অভিভাবককে সরানো হয়েছে","Notification sent to parent":"অভিভাবককে বিজ্ঞপ্তি পাঠানো হয়েছে","You left the class room":"আপনি ক্লাস রুম থেকে বেরিয়ে এসেছেন","Paste the link first":"আগে লিঙ্ক পেস্ট করুন","This link is not valid":"এই লিঙ্কটি সঠিক নয়","You have already joined this class room":"আপনি এই ক্লাস রুমে আগেই যুক্ত হয়েছেন","This class room is full":"এই ক্লাস রুম ভরে গেছে","Class room joined":"ক্লাস রুমে যুক্ত হয়েছেন","Create a class room first":"আগে একটি ক্লাস রুম তৈরি করুন","Add a photo or write homework":"ছবি যোগ করুন বা হোমওয়ার্ক লিখুন","Please choose a photo only":"অনুগ্রহ করে শুধু ছবি বেছে নিন","Homework uploaded":"হোমওয়ার্ক আপলোড হয়েছে","Phone number updated":"ফোন নম্বর বদলে গেছে","Number not available":"নম্বর পাওয়া যায়নি","Attendance can only be marked on tuition days":"উপস্থিতি শুধু টিউশনের দিনেই দেওয়া যায়","Change language":"ভাষা বদলান","Change phone number":"ফোন নম্বর বদলান","Log out":"লগ আউট","Delete parents":"অভিভাবক সরান","There are no parents in this class yet.":"এই ক্লাসে এখনও কোনো অভিভাবক নেই।","Remove {name} from this class?":"{name}-কে কি এই ক্লাস থেকে সরাতে চান?","Yes, remove":"হ্যাঁ, সরান","No, keep":"না, থাকুক","Edit":"বদলান","Delete":"মুছুন","Link":"লিঙ্ক","Details":"বিস্তারিত","Delete this class room?":"এই ক্লাস রুম কি মুছে ফেলবেন?","Yes, delete":"হ্যাঁ, মুছুন","Edit Class Room":"ক্লাস রুম বদলান","{a}/{b} students":"{a}/{b} জন ছাত্রছাত্রী","No class rooms yet. Tap Add Class Room below.":"এখনও কোনো ক্লাস রুম নেই। নিচে ক্লাস রুম যোগ করুন চাপুন।","Teacher:":"শিক্ষক:","Today:":"আজ:","Parent:":"অভিভাবক:","Phone:":"ফোন:","Total attendance:":"মোট উপস্থিতি:","Present":"উপস্থিত","Absent":"অনুপস্থিত","Call":"কল করুন","Today is not a tuition day for this class.":"আজ এই ক্লাসের টিউশনের দিন নয়।","No update today yet":"আজকের উপস্থিতি এখনও আসেনি","Total tuition days":"মোট টিউশনের দিন","Present days":"উপস্থিত দিন","Absent days":"অনুপস্থিত দিন","Call teacher":"শিক্ষককে কল করুন","Leave this class room?":"এই ক্লাস রুম থেকে বেরিয়ে যেতে চান?","Yes, leave":"হ্যাঁ, বেরিয়ে যান","Exit":"বেরিয়ে যান","Subjects:":"বিষয়:","Days:":"দিন:","Time:":"সময়:","Total students:":"মোট ছাত্রছাত্রী:","{a} (limit {b})":"{a} (সীমা {b})","Close":"বন্ধ করুন","No homework yet.":"এখনও কোনো হোমওয়ার্ক নেই।","No records yet.":"এখনও কোনো রেকর্ড নেই।","Options":"বিকল্প","Hindi":"হিন্দি","English":"ইংরেজি","Maths":"গণিত","Science":"বিজ্ঞান","Social Science":"সমাজবিজ্ঞান","Sanskrit":"সংস্কৃত","History":"ইতিহাস","Geography":"ভূগোল","Political Science":"রাষ্ট্রবিজ্ঞান","Economics":"অর্থনীতি","Computer":"কম্পিউটার","Other":"অন্যান্য","Morning":"সকাল","Evening":"সন্ধ্যা","Night":"রাত","Mon":"সোম","Tue":"মঙ্গল","Wed":"বুধ","Thu":"বৃহস্পতি","Fri":"শুক্র","Sat":"শনি","Sun":"রবি","Sunday":"রবিবার","Monday":"সোমবার","Tuesday":"মঙ্গলবার","Wednesday":"বুধবার","Thursday":"বৃহস্পতিবার","Friday":"শুক্রবার","Saturday":"শনিবার","Log in":"লগ ইন করুন","Already have an account? Log in":"আগে থেকেই অ্যাকাউন্ট আছে? লগ ইন করুন","Wrong email or password":"ইমেইল বা পাসওয়ার্ড ভুল","This email is already registered":"এই ইমেইল আগেই নিবন্ধিত","Please verify your email first":"অনুগ্রহ করে আগে আপনার ইমেইল যাচাই করুন","Too many attempts. Please try again later.":"অনেকবার চেষ্টা হয়েছে। অনুগ্রহ করে পরে আবার চেষ্টা করুন।","Something went wrong. Please try again.":"কিছু ভুল হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।","No internet connection":"ইন্টারনেট সংযোগ নেই","Account created. Please check your email to verify it, then log in.":"অ্যাকাউন্ট তৈরি হয়েছে। অনুগ্রহ করে ইমেইল যাচাই করুন, তারপর লগ ইন করুন।","Delete account":"অ্যাকাউন্ট মুছুন","Delete your account and all its data permanently?":"আপনার অ্যাকাউন্ট এবং এর সব তথ্য স্থায়ীভাবে মুছে ফেলবেন?","This cannot be undone.":"এটি আর ফেরানো যাবে না।","Yes, delete my account":"হ্যাঁ, আমার অ্যাকাউন্ট মুছুন","Account deleted":"অ্যাকাউন্ট মুছে ফেলা হয়েছে","Attendance saved":"উপস্থিতি সেভ হয়েছে","Photo could not be uploaded":"ছবি আপলোড করা যায়নি","Class code":"ক্লাস কোড","Class code:":"ক্লাস কোড:","Enter the class code":"ক্লাস কোড লিখুন","Enter the code given by your teacher":"শিক্ষকের দেওয়া কোড লিখুন","Share this code with parents. They enter it in Connect Class Rooms.":"এই কোডটি অভিভাবকদের দিন। তাঁরা ক্লাস রুমে যুক্ত হন-এ এটি লিখবেন।","Copy code":"কোড কপি করুন","Code copied":"কোড কপি হয়েছে","This code is not valid":"এই কোডটি সঠিক নয়","Enter the class code first":"আগে ক্লাস কোড লিখুন","Forgot password?":"পাসওয়ার্ড ভুলে গেছেন?","Password reset link sent. Please check your email.":"পাসওয়ার্ড রিসেট লিঙ্ক পাঠানো হয়েছে। অনুগ্রহ করে আপনার ইমেইল দেখুন।","Set a new password":"নতুন পাসওয়ার্ড দিন","New password":"নতুন পাসওয়ার্ড","Password updated":"পাসওয়ার্ড বদলে গেছে","Privacy policy":"গোপনীয়তা নীতি","No students in this class yet. Send the class code to parents.":"এই ক্লাসে এখনও কোনো ছাত্রছাত্রী নেই। ক্লাসের কোড অভিভাবকদের পাঠান।","You have not joined any class room yet. Enter the teacher's code in Connect Class Rooms.":"আপনি এখনও কোনো ক্লাস রুমে যুক্ত হননি। ক্লাস রুমে যুক্ত হন-এ শিক্ষকের কোড লিখুন।","This class room will be removed from your account. You will need the teacher's code to join again.":"এই ক্লাস রুম আপনার অ্যাকাউন্ট থেকে সরে যাবে। আবার যুক্ত হতে শিক্ষকের কোড লাগবে।"};
+I18N["gu"]={"{a} to {b}":"{a} થી {b}","Tuition Tracker":"ટ્યુશન ટ્રેકર","Add Class Room":"ક્લાસ રૂમ ઉમેરો","Add Class Rooms":"ક્લાસ રૂમ ઉમેરો","All Student Statements":"બધા વિદ્યાર્થીઓની વિગતો","Create your account":"તમારું ખાતું બનાવો","As a Parent":"વાલી તરીકે","As a Tuition Teacher":"ટ્યુશન શિક્ષક તરીકે","Attendance":"હાજરી","Class":"ધોરણ","Class Room":"ક્લાસ રૂમ","Class room link":"ક્લાસ રૂમની લિંક","Connect Class Rooms":"ક્લાસ રૂમ સાથે જોડાઓ","Continue":"આગળ વધો","Daily Homework":"રોજનું હોમવર્ક","Daily Homeworks":"રોજનું હોમવર્ક","Dashboard":"ડેશબોર્ડ","Gmail":"જીમેલ","Hello,":"નમસ્તે,","Homework photo":"હોમવર્કનો ફોટો","Write homework (optional)":"હોમવર્ક લખો (વૈકલ્પિક)","I am your Tuition Study Tracker":"હું તમારો ટ્યુશન સ્ટડી ટ્રેકર છું","Join":"જોડાઓ","Number of students":"વિદ્યાર્થીઓની સંખ્યા","Language":"ભાષા","Make in India":"મેક ઇન ઇન્ડિયા","My Child Class Rooms":"મારા બાળકના ક્લાસ રૂમ","My Child Statements":"મારા બાળકની વિગતો","My Class Rooms":"મારા ક્લાસ રૂમ","Parent":"વાલી","Parent name":"વાલીનું નામ","Password":"પાસવર્ડ","Phone number":"ફોન નંબર","Save":"સેવ કરો","Statements":"વિગતો","Student name":"વિદ્યાર્થીનું નામ","Subjects (select one or more)":"વિષયો (એક અથવા વધુ પસંદ કરો)","Teacher":"શિક્ષક","Paste the link sent by your teacher":"શિક્ષકે મોકલેલી લિંક અહીં પેસ્ટ કરો","Teacher name":"શિક્ષકનું નામ","Timing":"સમય","Tuition days":"ટ્યુશનના દિવસો","Upload":"અપલોડ કરો","Your name":"તમારું નામ","Back":"પાછળ","From time":"શરૂ થવાનો સમય","Settings":"સેટિંગ્સ","Show password":"પાસવર્ડ બતાવો","To time":"પૂરો થવાનો સમય","Enter your name":"તમારું નામ લખો","Enter parent name":"વાલીનું નામ લખો","Enter phone number":"ફોન નંબર લખો","Enter student name":"વિદ્યાર્થીનું નામ લખો","Enter your Gmail":"તમારું જીમેલ લખો","Write homework here":"હોમવર્ક અહીં લખો","Paste link here":"લિંક અહીં પેસ્ટ કરો","Set a password":"પાસવર્ડ બનાવો","Please choose Teacher or Parent":"કૃપા કરીને શિક્ષક અથવા વાલી પસંદ કરો","Enter a valid Gmail":"સાચું જીમેલ લખો","Password must be at least 6 characters":"પાસવર્ડ ઓછામાં ઓછા ૬ અક્ષરનો રાખો","Enter a valid phone number":"સાચો ફોન નંબર લખો","Enter the parent name":"વાલીનું નામ લખો","Enter the student name":"વિદ્યાર્થીનું નામ લખો","Enter the teacher name":"શિક્ષકનું નામ લખો","Select at least one subject":"ઓછામાં ઓછો એક વિષય પસંદ કરો","Enter the number of students":"વિદ્યાર્થીઓની સંખ્યા લખો","Choose the timing and from-to time":"સમય અને શરૂ-પૂરો થવાનો સમય પસંદ કરો","Select the tuition days":"ટ્યુશનના દિવસો પસંદ કરો","Number of students cannot be less than students already joined":"વિદ્યાર્થીઓની સંખ્યા પહેલેથી જોડાયેલા વિદ્યાર્થીઓ કરતાં ઓછી ન હોઈ શકે","Class room updated":"ક્લાસ રૂમ અપડેટ થયો","Class room created":"ક્લાસ રૂમ બની ગયો","Class room deleted":"ક્લાસ રૂમ કાઢી નાખ્યો","Link copied":"લિંક કૉપિ થઈ","Parent removed":"વાલીને દૂર કર્યા","Notification sent to parent":"વાલીને સૂચના મોકલી","You left the class room":"તમે ક્લાસ રૂમમાંથી બહાર નીકળી ગયા","Paste the link first":"પહેલા લિંક પેસ્ટ કરો","This link is not valid":"આ લિંક સાચી નથી","You have already joined this class room":"તમે આ ક્લાસ રૂમમાં પહેલેથી જોડાયેલા છો","This class room is full":"આ ક્લાસ રૂમ ભરાઈ ગયો છે","Class room joined":"ક્લાસ રૂમ સાથે જોડાઈ ગયા","Create a class room first":"પહેલા ક્લાસ રૂમ બનાવો","Add a photo or write homework":"ફોટો ઉમેરો અથવા હોમવર્ક લખો","Please choose a photo only":"કૃપા કરીને ફક્ત ફોટો પસંદ કરો","Homework uploaded":"હોમવર્ક અપલોડ થઈ ગયું","Phone number updated":"ફોન નંબર બદલાઈ ગયો","Number not available":"નંબર ઉપલબ્ધ નથી","Attendance can only be marked on tuition days":"હાજરી ફક્ત ટ્યુશનના દિવસે જ પૂરી શકાય છે","Change language":"ભાષા બદલો","Change phone number":"ફોન નંબર બદલો","Log out":"લૉગ આઉટ","Delete parents":"વાલીને દૂર કરો","There are no parents in this class yet.":"આ ક્લાસમાં હજી કોઈ વાલી નથી.","Remove {name} from this class?":"{name} ને આ ક્લાસમાંથી દૂર કરવા છે?","Yes, remove":"હા, દૂર કરો","No, keep":"ના, રહેવા દો","Edit":"બદલો","Delete":"કાઢી નાખો","Link":"લિંક","Details":"વિગત","Delete this class room?":"આ ક્લાસ રૂમ કાઢી નાખવો છે?","Yes, delete":"હા, કાઢી નાખો","Edit Class Room":"ક્લાસ રૂમ બદલો","{a}/{b} students":"{a}/{b} વિદ્યાર્થીઓ","No class rooms yet. Tap Add Class Room below.":"હજી કોઈ ક્લાસ રૂમ નથી. નીચે ક્લાસ રૂમ ઉમેરો દબાવો.","Teacher:":"શિક્ષક:","Today:":"આજે:","Parent:":"વાલી:","Phone:":"ફોન:","Total attendance:":"કુલ હાજરી:","Present":"હાજર","Absent":"ગેરહાજર","Call":"કૉલ કરો","Today is not a tuition day for this class.":"આજે આ ક્લાસના ટ્યુશનનો દિવસ નથી.","No update today yet":"આજની હાજરી હજી આવી નથી","Total tuition days":"કુલ ટ્યુશનના દિવસો","Present days":"હાજર દિવસો","Absent days":"ગેરહાજર દિવસો","Call teacher":"શિક્ષકને કૉલ કરો","Leave this class room?":"આ ક્લાસ રૂમમાંથી બહાર નીકળવું છે?","Yes, leave":"હા, બહાર નીકળો","Exit":"બહાર નીકળો","Subjects:":"વિષયો:","Days:":"દિવસો:","Time:":"સમય:","Total students:":"કુલ વિદ્યાર્થીઓ:","{a} (limit {b})":"{a} (મર્યાદા {b})","Close":"બંધ કરો","No homework yet.":"હજી કોઈ હોમવર્ક નથી.","No records yet.":"હજી કોઈ રેકોર્ડ નથી.","Options":"વિકલ્પો","Hindi":"હિન્દી","English":"અંગ્રેજી","Maths":"ગણિત","Science":"વિજ્ઞાન","Social Science":"સામાજિક વિજ્ઞાન","Sanskrit":"સંસ્કૃત","History":"ઇતિહાસ","Geography":"ભૂગોળ","Political Science":"રાજ્યશાસ્ત્ર","Economics":"અર્થશાસ્ત્ર","Computer":"કમ્પ્યુટર","Other":"અન્ય","Morning":"સવાર","Evening":"સાંજ","Night":"રાત","Mon":"સોમ","Tue":"મંગળ","Wed":"બુધ","Thu":"ગુરુ","Fri":"શુક્ર","Sat":"શનિ","Sun":"રવિ","Sunday":"રવિવાર","Monday":"સોમવાર","Tuesday":"મંગળવાર","Wednesday":"બુધવાર","Thursday":"ગુરુવાર","Friday":"શુક્રવાર","Saturday":"શનિવાર","Log in":"લૉગ ઇન કરો","Already have an account? Log in":"પહેલેથી ખાતું છે? લૉગ ઇન કરો","Wrong email or password":"ઇમેઇલ અથવા પાસવર્ડ ખોટો છે","This email is already registered":"આ ઇમેઇલ પહેલેથી નોંધાયેલો છે","Please verify your email first":"કૃપા કરીને પહેલા તમારો ઇમેઇલ ચકાસો","Too many attempts. Please try again later.":"ઘણા પ્રયત્નો થઈ ગયા. કૃપા કરીને પછી ફરી પ્રયત્ન કરો.","Something went wrong. Please try again.":"કંઈક ખોટું થયું. કૃપા કરીને ફરી પ્રયત્ન કરો.","No internet connection":"ઇન્ટરનેટ કનેક્શન નથી","Account created. Please check your email to verify it, then log in.":"ખાતું બની ગયું. કૃપા કરીને તમારો ઇમેઇલ ચકાસો, પછી લૉગ ઇન કરો.","Delete account":"ખાતું કાઢી નાખો","Delete your account and all its data permanently?":"તમારું ખાતું અને તેનો બધો ડેટા કાયમ માટે કાઢી નાખવો છે?","This cannot be undone.":"આને પાછું લઈ શકાશે નહીં.","Yes, delete my account":"હા, મારું ખાતું કાઢી નાખો","Account deleted":"ખાતું કાઢી નાખ્યું","Attendance saved":"હાજરી સેવ થઈ","Photo could not be uploaded":"ફોટો અપલોડ થઈ શક્યો નથી","Class code":"ક્લાસ કોડ","Class code:":"ક્લાસ કોડ:","Enter the class code":"ક્લાસ કોડ લખો","Enter the code given by your teacher":"શિક્ષકે આપેલો કોડ લખો","Share this code with parents. They enter it in Connect Class Rooms.":"આ કોડ વાલીઓને આપો. તેઓ ક્લાસ રૂમ સાથે જોડાઓ માં તે લખશે.","Copy code":"કોડ કૉપિ કરો","Code copied":"કોડ કૉપિ થયો","This code is not valid":"આ કોડ સાચો નથી","Enter the class code first":"પહેલા ક્લાસ કોડ લખો","Forgot password?":"પાસવર્ડ ભૂલી ગયા?","Password reset link sent. Please check your email.":"પાસવર્ડ રીસેટ લિંક મોકલી છે. કૃપા કરીને તમારો ઇમેઇલ જુઓ.","Set a new password":"નવો પાસવર્ડ બનાવો","New password":"નવો પાસવર્ડ","Password updated":"પાસવર્ડ બદલાઈ ગયો","Privacy policy":"ગોપનીયતા નીતિ","No students in this class yet. Send the class code to parents.":"આ ક્લાસમાં હજી કોઈ વિદ્યાર્થી નથી. ક્લાસનો કોડ વાલીઓને મોકલો.","You have not joined any class room yet. Enter the teacher's code in Connect Class Rooms.":"તમે હજી કોઈ ક્લાસ રૂમમાં જોડાયા નથી. ક્લાસ રૂમ સાથે જોડાઓ માં શિક્ષકનો કોડ લખો.","This class room will be removed from your account. You will need the teacher's code to join again.":"આ ક્લાસ રૂમ તમારા ખાતામાંથી દૂર થઈ જશે. ફરી જોડાવા માટે શિક્ષકનો કોડ જોઈશે."};
+I18N["ta"]={"{a} to {b}":"{a} முதல் {b}","Tuition Tracker":"டியூஷன் டிராக்கர்","Add Class Room":"வகுப்பறையைச் சேர்க்கவும்","Add Class Rooms":"வகுப்பறையைச் சேர்க்கவும்","All Student Statements":"அனைத்து மாணவர்களின் விவரங்கள்","Create your account":"உங்கள் கணக்கை உருவாக்கவும்","As a Parent":"பெற்றோராக","As a Tuition Teacher":"டியூஷன் ஆசிரியராக","Attendance":"வருகைப் பதிவு","Class":"வகுப்பு","Class Room":"வகுப்பறை","Class room link":"வகுப்பறை இணைப்பு","Connect Class Rooms":"வகுப்பறைகளுடன் இணையுங்கள்","Continue":"தொடரவும்","Daily Homework":"தினசரி வீட்டுப்பாடம்","Daily Homeworks":"தினசரி வீட்டுப்பாடம்","Dashboard":"டாஷ்போர்டு","Gmail":"ஜிமெயில்","Hello,":"வணக்கம்,","Homework photo":"வீட்டுப்பாடத்தின் புகைப்படம்","Write homework (optional)":"வீட்டுப்பாடத்தை எழுதுங்கள் (விருப்பம்)","I am your Tuition Study Tracker":"நான் உங்கள் டியூஷன் ஸ்டடி டிராக்கர்","Join":"இணைய","Number of students":"மாணவர்களின் எண்ணிக்கை","Language":"மொழி","Make in India":"மேக் இன் இந்தியா","My Child Class Rooms":"என் குழந்தையின் வகுப்பறைகள்","My Child Statements":"என் குழந்தையின் விவரங்கள்","My Class Rooms":"என் வகுப்பறைகள்","Parent":"பெற்றோர்","Parent name":"பெற்றோரின் பெயர்","Password":"கடவுச்சொல்","Phone number":"தொலைபேசி எண்","Save":"சேமி","Statements":"விவரங்கள்","Student name":"மாணவரின் பெயர்","Subjects (select one or more)":"பாடங்கள் (ஒன்று அல்லது பல தேர்வு செய்யவும்)","Teacher":"ஆசிரியர்","Paste the link sent by your teacher":"ஆசிரியர் அனுப்பிய இணைப்பை இங்கே ஒட்டவும்","Teacher name":"ஆசிரியரின் பெயர்","Timing":"நேரம்","Tuition days":"டியூஷன் நாட்கள்","Upload":"பதிவேற்று","Your name":"உங்கள் பெயர்","Back":"பின்செல்","From time":"தொடக்க நேரம்","Settings":"அமைப்புகள்","Show password":"கடவுச்சொல்லைக் காட்டு","To time":"முடிவு நேரம்","Enter your name":"உங்கள் பெயரை எழுதுங்கள்","Enter parent name":"பெற்றோரின் பெயரை எழுதுங்கள்","Enter phone number":"தொலைபேசி எண்ணை எழுதுங்கள்","Enter student name":"மாணவரின் பெயரை எழுதுங்கள்","Enter your Gmail":"உங்கள் ஜிமெயிலை எழுதுங்கள்","Write homework here":"வீட்டுப்பாடத்தை இங்கே எழுதுங்கள்","Paste link here":"இணைப்பை இங்கே ஒட்டவும்","Set a password":"கடவுச்சொல்லை உருவாக்குங்கள்","Please choose Teacher or Parent":"தயவுசெய்து ஆசிரியர் அல்லது பெற்றோரைத் தேர்ந்தெடுக்கவும்","Enter a valid Gmail":"சரியான ஜிமெயிலை எழுதுங்கள்","Password must be at least 6 characters":"கடவுச்சொல் குறைந்தது 6 எழுத்துகள் இருக்க வேண்டும்","Enter a valid phone number":"சரியான தொலைபேசி எண்ணை எழுதுங்கள்","Enter the parent name":"பெற்றோரின் பெயரை எழுதுங்கள்","Enter the student name":"மாணவரின் பெயரை எழுதுங்கள்","Enter the teacher name":"ஆசிரியரின் பெயரை எழுதுங்கள்","Select at least one subject":"குறைந்தது ஒரு பாடத்தைத் தேர்ந்தெடுக்கவும்","Enter the number of students":"மாணவர்களின் எண்ணிக்கையை எழுதுங்கள்","Choose the timing and from-to time":"நேரத்தையும் தொடக்க-முடிவு நேரத்தையும் தேர்ந்தெடுக்கவும்","Select the tuition days":"டியூஷன் நாட்களைத் தேர்ந்தெடுக்கவும்","Number of students cannot be less than students already joined":"மாணவர்களின் எண்ணிக்கை ஏற்கனவே இணைந்த மாணவர்களை விடக் குறைவாக இருக்கக் கூடாது","Class room updated":"வகுப்பறை புதுப்பிக்கப்பட்டது","Class room created":"வகுப்பறை உருவாக்கப்பட்டது","Class room deleted":"வகுப்பறை நீக்கப்பட்டது","Link copied":"இணைப்பு நகலெடுக்கப்பட்டது","Parent removed":"பெற்றோர் நீக்கப்பட்டார்","Notification sent to parent":"பெற்றோருக்கு அறிவிப்பு அனுப்பப்பட்டது","You left the class room":"நீங்கள் வகுப்பறையிலிருந்து வெளியேறினீர்கள்","Paste the link first":"முதலில் இணைப்பை ஒட்டவும்","This link is not valid":"இந்த இணைப்பு சரியல்ல","You have already joined this class room":"நீங்கள் ஏற்கனவே இந்த வகுப்பறையில் இணைந்துள்ளீர்கள்","This class room is full":"இந்த வகுப்பறை நிரம்பிவிட்டது","Class room joined":"வகுப்பறையில் இணைந்தீர்கள்","Create a class room first":"முதலில் ஒரு வகுப்பறையை உருவாக்குங்கள்","Add a photo or write homework":"புகைப்படம் சேர்க்கவும் அல்லது வீட்டுப்பாடம் எழுதவும்","Please choose a photo only":"தயவுசெய்து புகைப்படத்தை மட்டும் தேர்ந்தெடுக்கவும்","Homework uploaded":"வீட்டுப்பாடம் பதிவேற்றப்பட்டது","Phone number updated":"தொலைபேசி எண் மாற்றப்பட்டது","Number not available":"எண் கிடைக்கவில்லை","Attendance can only be marked on tuition days":"வருகையை டியூஷன் நாட்களில் மட்டுமே பதிவு செய்ய முடியும்","Change language":"மொழியை மாற்று","Change phone number":"தொலைபேசி எண்ணை மாற்று","Log out":"வெளியேறு","Delete parents":"பெற்றோரை நீக்கு","There are no parents in this class yet.":"இந்த வகுப்பில் இன்னும் பெற்றோர் யாரும் இல்லை.","Remove {name} from this class?":"{name} அவர்களை இந்த வகுப்பிலிருந்து நீக்க வேண்டுமா?","Yes, remove":"ஆம், நீக்கு","No, keep":"இல்லை, இருக்கட்டும்","Edit":"திருத்து","Delete":"நீக்கு","Link":"இணைப்பு","Details":"விவரம்","Delete this class room?":"இந்த வகுப்பறையை நீக்க வேண்டுமா?","Yes, delete":"ஆம், நீக்கு","Edit Class Room":"வகுப்பறையைத் திருத்து","{a}/{b} students":"{a}/{b} மாணவர்கள்","No class rooms yet. Tap Add Class Room below.":"இன்னும் வகுப்பறைகள் இல்லை. கீழே வகுப்பறையைச் சேர்க்கவும் என்பதை அழுத்தவும்.","Teacher:":"ஆசிரியர்:","Today:":"இன்று:","Parent:":"பெற்றோர்:","Phone:":"தொலைபேசி:","Total attendance:":"மொத்த வருகை:","Present":"வந்தவர்","Absent":"வராதவர்","Call":"அழை","Today is not a tuition day for this class.":"இன்று இந்த வகுப்பின் டியூஷன் நாள் அல்ல.","No update today yet":"இன்றைய வருகை இன்னும் வரவில்லை","Total tuition days":"மொத்த டியூஷன் நாட்கள்","Present days":"வந்த நாட்கள்","Absent days":"வராத நாட்கள்","Call teacher":"ஆசிரியரை அழை","Leave this class room?":"இந்த வகுப்பறையிலிருந்து வெளியேற வேண்டுமா?","Yes, leave":"ஆம், வெளியேறு","Exit":"வெளியேறு","Subjects:":"பாடங்கள்:","Days:":"நாட்கள்:","Time:":"நேரம்:","Total students:":"மொத்த மாணவர்கள்:","{a} (limit {b})":"{a} (வரம்பு {b})","Close":"மூடு","No homework yet.":"இன்னும் வீட்டுப்பாடம் இல்லை.","No records yet.":"இன்னும் பதிவுகள் இல்லை.","Options":"விருப்பங்கள்","Hindi":"இந்தி","English":"ஆங்கிலம்","Maths":"கணிதம்","Science":"அறிவியல்","Social Science":"சமூக அறிவியல்","Sanskrit":"சமஸ்கிருதம்","History":"வரலாறு","Geography":"புவியியல்","Political Science":"அரசியல் அறிவியல்","Economics":"பொருளாதாரம்","Computer":"கணினி","Other":"மற்றவை","Morning":"காலை","Evening":"மாலை","Night":"இரவு","Mon":"திங்கள்","Tue":"செவ்வாய்","Wed":"புதன்","Thu":"வியாழன்","Fri":"வெள்ளி","Sat":"சனி","Sun":"ஞாயிறு","Sunday":"ஞாயிற்றுக்கிழமை","Monday":"திங்கட்கிழமை","Tuesday":"செவ்வாய்க்கிழமை","Wednesday":"புதன்கிழமை","Thursday":"வியாழக்கிழமை","Friday":"வெள்ளிக்கிழமை","Saturday":"சனிக்கிழமை","Log in":"உள்நுழையவும்","Already have an account? Log in":"ஏற்கனவே கணக்கு உள்ளதா? உள்நுழையவும்","Wrong email or password":"மின்னஞ்சல் அல்லது கடவுச்சொல் தவறு","This email is already registered":"இந்த மின்னஞ்சல் ஏற்கனவே பதிவு செய்யப்பட்டுள்ளது","Please verify your email first":"தயவுசெய்து முதலில் உங்கள் மின்னஞ்சலைச் சரிபார்க்கவும்","Too many attempts. Please try again later.":"பல முறை முயற்சி செய்யப்பட்டது. பிறகு மீண்டும் முயற்சிக்கவும்.","Something went wrong. Please try again.":"ஏதோ தவறு நடந்தது. மீண்டும் முயற்சிக்கவும்.","No internet connection":"இணைய இணைப்பு இல்லை","Account created. Please check your email to verify it, then log in.":"கணக்கு உருவாக்கப்பட்டது. உங்கள் மின்னஞ்சலைச் சரிபார்த்து, பிறகு உள்நுழையவும்.","Delete account":"கணக்கை நீக்கு","Delete your account and all its data permanently?":"உங்கள் கணக்கையும் அதன் அனைத்துத் தரவையும் நிரந்தரமாக நீக்க வேண்டுமா?","This cannot be undone.":"இதை மீட்டெடுக்க முடியாது.","Yes, delete my account":"ஆம், என் கணக்கை நீக்கு","Account deleted":"கணக்கு நீக்கப்பட்டது","Attendance saved":"வருகை சேமிக்கப்பட்டது","Photo could not be uploaded":"புகைப்படத்தைப் பதிவேற்ற முடியவில்லை","Class code":"வகுப்பு குறியீடு","Class code:":"வகுப்பு குறியீடு:","Enter the class code":"வகுப்பு குறியீட்டை உள்ளிடவும்","Enter the code given by your teacher":"ஆசிரியர் கொடுத்த குறியீட்டை உள்ளிடவும்","Share this code with parents. They enter it in Connect Class Rooms.":"இந்தக் குறியீட்டைப் பெற்றோருக்குக் கொடுங்கள். அவர்கள் வகுப்பறைகளுடன் இணையுங்கள் பகுதியில் இதை உள்ளிடுவார்கள்.","Copy code":"குறியீட்டை நகலெடு","Code copied":"குறியீடு நகலெடுக்கப்பட்டது","This code is not valid":"இந்தக் குறியீடு சரியல்ல","Enter the class code first":"முதலில் வகுப்பு குறியீட்டை உள்ளிடவும்","Forgot password?":"கடவுச்சொல்லை மறந்துவிட்டீர்களா?","Password reset link sent. Please check your email.":"கடவுச்சொல் மீட்டமைப்பு இணைப்பு அனுப்பப்பட்டது. உங்கள் மின்னஞ்சலைப் பாருங்கள்.","Set a new password":"புதிய கடவுச்சொல்லை அமைக்கவும்","New password":"புதிய கடவுச்சொல்","Password updated":"கடவுச்சொல் மாற்றப்பட்டது","Privacy policy":"தனியுரிமைக் கொள்கை","No students in this class yet. Send the class code to parents.":"இந்த வகுப்பில் இன்னும் மாணவர்கள் இல்லை. வகுப்பு குறியீட்டை பெற்றோருக்கு அனுப்புங்கள்.","You have not joined any class room yet. Enter the teacher's code in Connect Class Rooms.":"நீங்கள் இன்னும் எந்த வகுப்பறையிலும் இணையவில்லை. வகுப்பறைகளுடன் இணையுங்கள் பகுதியில் ஆசிரியரின் குறியீட்டை உள்ளிடவும்.","This class room will be removed from your account. You will need the teacher's code to join again.":"இந்த வகுப்பறை உங்கள் கணக்கிலிருந்து நீக்கப்படும். மீண்டும் இணைய ஆசிரியரின் குறியீடு தேவை."};
+I18N["te"]={"{a} to {b}":"{a} నుండి {b}","Tuition Tracker":"ట్యూషన్ ట్రాకర్","Add Class Room":"క్లాస్ రూమ్ జోడించండి","Add Class Rooms":"క్లాస్ రూమ్ జోడించండి","All Student Statements":"విద్యార్థులందరి వివరాలు","Create your account":"మీ ఖాతాను సృష్టించండి","As a Parent":"తల్లిదండ్రులుగా","As a Tuition Teacher":"ట్యూషన్ టీచర్‌గా","Attendance":"హాజరు","Class":"తరగతి","Class Room":"క్లాస్ రూమ్","Class room link":"క్లాస్ రూమ్ లింక్","Connect Class Rooms":"క్లాస్ రూమ్‌లతో కలవండి","Continue":"కొనసాగించండి","Daily Homework":"రోజువారీ హోంవర్క్","Daily Homeworks":"రోజువారీ హోంవర్క్","Dashboard":"డాష్‌బోర్డ్","Gmail":"జీమెయిల్","Hello,":"నమస్కారం,","Homework photo":"హోంవర్క్ ఫోటో","Write homework (optional)":"హోంవర్క్ రాయండి (ఐచ్ఛికం)","I am your Tuition Study Tracker":"నేను మీ ట్యూషన్ స్టడీ ట్రాకర్‌ని","Join":"చేరండి","Number of students":"విద్యార్థుల సంఖ్య","Language":"భాష","Make in India":"మేక్ ఇన్ ఇండియా","My Child Class Rooms":"నా బిడ్డ క్లాస్ రూమ్‌లు","My Child Statements":"నా బిడ్డ వివరాలు","My Class Rooms":"నా క్లాస్ రూమ్‌లు","Parent":"తల్లిదండ్రులు","Parent name":"తల్లిదండ్రుల పేరు","Password":"పాస్‌వర్డ్","Phone number":"ఫోన్ నంబర్","Save":"సేవ్ చేయండి","Statements":"వివరాలు","Student name":"విద్యార్థి పేరు","Subjects (select one or more)":"సబ్జెక్టులు (ఒకటి లేదా అంతకంటే ఎక్కువ ఎంచుకోండి)","Teacher":"టీచర్","Paste the link sent by your teacher":"టీచర్ పంపిన లింక్‌ను ఇక్కడ పేస్ట్ చేయండి","Teacher name":"టీచర్ పేరు","Timing":"సమయం","Tuition days":"ట్యూషన్ రోజులు","Upload":"అప్‌లోడ్ చేయండి","Your name":"మీ పేరు","Back":"వెనక్కి","From time":"ప్రారంభ సమయం","Settings":"సెట్టింగ్స్","Show password":"పాస్‌వర్డ్ చూపించు","To time":"ముగింపు సమయం","Enter your name":"మీ పేరు రాయండి","Enter parent name":"తల్లిదండ్రుల పేరు రాయండి","Enter phone number":"ఫోన్ నంబర్ రాయండి","Enter student name":"విద్యార్థి పేరు రాయండి","Enter your Gmail":"మీ జీమెయిల్ రాయండి","Write homework here":"హోంవర్క్ ఇక్కడ రాయండి","Paste link here":"లింక్‌ను ఇక్కడ పేస్ట్ చేయండి","Set a password":"పాస్‌వర్డ్ సృష్టించండి","Please choose Teacher or Parent":"దయచేసి టీచర్ లేదా తల్లిదండ్రులను ఎంచుకోండి","Enter a valid Gmail":"సరైన జీమెయిల్ రాయండి","Password must be at least 6 characters":"పాస్‌వర్డ్ కనీసం 6 అక్షరాలు ఉండాలి","Enter a valid phone number":"సరైన ఫోన్ నంబర్ రాయండి","Enter the parent name":"తల్లిదండ్రుల పేరు రాయండి","Enter the student name":"విద్యార్థి పేరు రాయండి","Enter the teacher name":"టీచర్ పేరు రాయండి","Select at least one subject":"కనీసం ఒక సబ్జెక్టు ఎంచుకోండి","Enter the number of students":"విద్యార్థుల సంఖ్య రాయండి","Choose the timing and from-to time":"సమయం మరియు ప్రారంభ-ముగింపు సమయం ఎంచుకోండి","Select the tuition days":"ట్యూషన్ రోజులు ఎంచుకోండి","Number of students cannot be less than students already joined":"విద్యార్థుల సంఖ్య ఇప్పటికే చేరిన విద్యార్థుల కంటే తక్కువ ఉండకూడదు","Class room updated":"క్లాస్ రూమ్ అప్‌డేట్ అయింది","Class room created":"క్లాస్ రూమ్ సృష్టించబడింది","Class room deleted":"క్లాస్ రూమ్ తొలగించబడింది","Link copied":"లింక్ కాపీ అయింది","Parent removed":"తల్లిదండ్రులను తొలగించారు","Notification sent to parent":"తల్లిదండ్రులకు నోటిఫికేషన్ పంపబడింది","You left the class room":"మీరు క్లాస్ రూమ్ నుండి బయటకు వచ్చారు","Paste the link first":"ముందుగా లింక్‌ను పేస్ట్ చేయండి","This link is not valid":"ఈ లింక్ సరైనది కాదు","You have already joined this class room":"మీరు ఇప్పటికే ఈ క్లాస్ రూమ్‌లో చేరారు","This class room is full":"ఈ క్లాస్ రూమ్ నిండిపోయింది","Class room joined":"క్లాస్ రూమ్‌లో చేరారు","Create a class room first":"ముందుగా క్లాస్ రూమ్ సృష్టించండి","Add a photo or write homework":"ఫోటో జోడించండి లేదా హోంవర్క్ రాయండి","Please choose a photo only":"దయచేసి ఫోటోను మాత్రమే ఎంచుకోండి","Homework uploaded":"హోంవర్క్ అప్‌లోడ్ అయింది","Phone number updated":"ఫోన్ నంబర్ మారింది","Number not available":"నంబర్ అందుబాటులో లేదు","Attendance can only be marked on tuition days":"హాజరును ట్యూషన్ రోజుల్లో మాత్రమే నమోదు చేయగలరు","Change language":"భాష మార్చండి","Change phone number":"ఫోన్ నంబర్ మార్చండి","Log out":"లాగ్ అవుట్","Delete parents":"తల్లిదండ్రులను తొలగించండి","There are no parents in this class yet.":"ఈ క్లాస్‌లో ఇంకా తల్లిదండ్రులు ఎవరూ లేరు.","Remove {name} from this class?":"{name} ను ఈ క్లాస్ నుండి తొలగించాలా?","Yes, remove":"అవును, తొలగించండి","No, keep":"వద్దు, ఉంచండి","Edit":"మార్చండి","Delete":"తొలగించండి","Link":"లింక్","Details":"వివరం","Delete this class room?":"ఈ క్లాస్ రూమ్‌ను తొలగించాలా?","Yes, delete":"అవును, తొలగించండి","Edit Class Room":"క్లాస్ రూమ్ మార్చండి","{a}/{b} students":"{a}/{b} విద్యార్థులు","No class rooms yet. Tap Add Class Room below.":"ఇంకా క్లాస్ రూమ్‌లు లేవు. కింద క్లాస్ రూమ్ జోడించండి నొక్కండి.","Teacher:":"టీచర్:","Today:":"ఈరోజు:","Parent:":"తల్లిదండ్రులు:","Phone:":"ఫోన్:","Total attendance:":"మొత్తం హాజరు:","Present":"హాజరు","Absent":"గైర్హాజరు","Call":"కాల్ చేయండి","Today is not a tuition day for this class.":"ఈరోజు ఈ క్లాస్‌కు ట్యూషన్ రోజు కాదు.","No update today yet":"ఈరోజు హాజరు ఇంకా రాలేదు","Total tuition days":"మొత్తం ట్యూషన్ రోజులు","Present days":"హాజరైన రోజులు","Absent days":"గైర్హాజరైన రోజులు","Call teacher":"టీచర్‌కు కాల్ చేయండి","Leave this class room?":"ఈ క్లాస్ రూమ్ నుండి బయటకు వెళ్లాలా?","Yes, leave":"అవును, బయటకు వెళ్ళండి","Exit":"బయటకు వెళ్ళండి","Subjects:":"సబ్జెక్టులు:","Days:":"రోజులు:","Time:":"సమయం:","Total students:":"మొత్తం విద్యార్థులు:","{a} (limit {b})":"{a} (పరిమితి {b})","Close":"మూసివేయండి","No homework yet.":"ఇంకా హోంవర్క్ లేదు.","No records yet.":"ఇంకా రికార్డులు లేవు.","Options":"ఎంపికలు","Hindi":"హిందీ","English":"ఇంగ్లీష్","Maths":"గణితం","Science":"సైన్స్","Social Science":"సోషల్ సైన్స్","Sanskrit":"సంస్కృతం","History":"చరిత్ర","Geography":"భూగోళశాస్త్రం","Political Science":"రాజనీతి శాస్త్రం","Economics":"ఆర్థికశాస్త్రం","Computer":"కంప్యూటర్","Other":"ఇతర","Morning":"ఉదయం","Evening":"సాయంత్రం","Night":"రాత్రి","Mon":"సోమ","Tue":"మంగళ","Wed":"బుధ","Thu":"గురు","Fri":"శుక్ర","Sat":"శని","Sun":"ఆది","Sunday":"ఆదివారం","Monday":"సోమవారం","Tuesday":"మంగళవారం","Wednesday":"బుధవారం","Thursday":"గురువారం","Friday":"శుక్రవారం","Saturday":"శనివారం","Log in":"లాగ్ ఇన్ చేయండి","Already have an account? Log in":"ఇప్పటికే ఖాతా ఉందా? లాగ్ ఇన్ చేయండి","Wrong email or password":"ఇమెయిల్ లేదా పాస్‌వర్డ్ తప్పు","This email is already registered":"ఈ ఇమెయిల్ ఇప్పటికే నమోదు చేయబడింది","Please verify your email first":"దయచేసి ముందు మీ ఇమెయిల్‌ను ధృవీకరించండి","Too many attempts. Please try again later.":"చాలా ప్రయత్నాలు జరిగాయి. దయచేసి తర్వాత మళ్లీ ప్రయత్నించండి.","Something went wrong. Please try again.":"ఏదో తప్పు జరిగింది. దయచేసి మళ్లీ ప్రయత్నించండి.","No internet connection":"ఇంటర్నెట్ కనెక్షన్ లేదు","Account created. Please check your email to verify it, then log in.":"ఖాతా సృష్టించబడింది. దయచేసి మీ ఇమెయిల్‌ను ధృవీకరించి, ఆపై లాగ్ ఇన్ చేయండి.","Delete account":"ఖాతాను తొలగించండి","Delete your account and all its data permanently?":"మీ ఖాతాను మరియు దాని మొత్తం డేటాను శాశ్వతంగా తొలగించాలా?","This cannot be undone.":"దీన్ని వెనక్కి తీసుకోలేరు.","Yes, delete my account":"అవును, నా ఖాతాను తొలగించండి","Account deleted":"ఖాతా తొలగించబడింది","Attendance saved":"హాజరు సేవ్ అయింది","Photo could not be uploaded":"ఫోటోను అప్‌లోడ్ చేయలేకపోయాము","Class code":"క్లాస్ కోడ్","Class code:":"క్లాస్ కోడ్:","Enter the class code":"క్లాస్ కోడ్ నమోదు చేయండి","Enter the code given by your teacher":"టీచర్ ఇచ్చిన కోడ్‌ను నమోదు చేయండి","Share this code with parents. They enter it in Connect Class Rooms.":"ఈ కోడ్‌ను తల్లిదండ్రులకు ఇవ్వండి. వారు క్లాస్ రూమ్‌లతో కలవండి లో దీన్ని నమోదు చేస్తారు.","Copy code":"కోడ్ కాపీ చేయండి","Code copied":"కోడ్ కాపీ అయింది","This code is not valid":"ఈ కోడ్ సరైనది కాదు","Enter the class code first":"ముందుగా క్లాస్ కోడ్ నమోదు చేయండి","Forgot password?":"పాస్‌వర్డ్ మర్చిపోయారా?","Password reset link sent. Please check your email.":"పాస్‌వర్డ్ రీసెట్ లింక్ పంపబడింది. దయచేసి మీ ఇమెయిల్ చూడండి.","Set a new password":"కొత్త పాస్‌వర్డ్ సెట్ చేయండి","New password":"కొత్త పాస్‌వర్డ్","Password updated":"పాస్‌వర్డ్ మారింది","Privacy policy":"గోప్యతా విధానం","No students in this class yet. Send the class code to parents.":"ఈ క్లాస్‌లో ఇంకా విద్యార్థులు లేరు. క్లాస్ కోడ్‌ను తల్లిదండ్రులకు పంపండి.","You have not joined any class room yet. Enter the teacher's code in Connect Class Rooms.":"మీరు ఇంకా ఏ క్లాస్ రూమ్‌లోనూ చేరలేదు. క్లాస్ రూమ్‌లతో కలవండి లో టీచర్ కోడ్‌ను నమోదు చేయండి.","This class room will be removed from your account. You will need the teacher's code to join again.":"ఈ క్లాస్ రూమ్ మీ ఖాతా నుండి తొలగించబడుతుంది. మళ్లీ చేరడానికి టీచర్ కోడ్ అవసరం."};
+
+function t(k, v){
+  var d = I18N[lang], s = (d && d[k]) || k;
+  if (v) for (var x in v) s = s.split("{" + x + "}").join(v[x]);
+  return s;
+}
+var textNodes = [], attrEls = [];
+function collectStatic(){
+  if (!document.createTreeWalker) return;
+  var w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null), n;
+  while ((n = w.nextNode())) {
+    var pn = n.parentNode.nodeName;
+    if (pn === "SCRIPT" || pn === "STYLE") continue;
+    var m = n.nodeValue.match(/^(\s*)([\s\S]*?)(\s*)$/);
+    if (m[2]) textNodes.push({n: n, k: m[2], a: m[1], b: m[3]});
+  }
+  var els = document.querySelectorAll("[placeholder],[aria-label]");
+  for (var i = 0; i < els.length; i++) attrEls.push({e: els[i], p: els[i].getAttribute("placeholder"), l: els[i].getAttribute("aria-label")});
+}
+function applyStatic(){
+  for (var i = 0; i < textNodes.length; i++) { var x = textNodes[i]; x.n.nodeValue = x.a + t(x.k) + x.b; }
+  for (var j = 0; j < attrEls.length; j++) {
+    var y = attrEls[j];
+    if (y.p) y.e.setAttribute("placeholder", t(y.p));
+    if (y.l) y.e.setAttribute("aria-label", t(y.l));
+  }
+  document.title = t("Tuition Tracker");
+  document.documentElement.lang = lang;
+}
+function refreshAll(){
+  applyStatic();
+  closeSheet();
+  renderRooms();
+  if (me) renderParentRooms();
+  drawChips();
+  $("ft").textContent = t(editIdx > -1 ? "Edit Class Room" : "Add Class Room");
+  var on = document.querySelector(".screen.on"), id = on ? on.id : "";
+  if (id === "s6" && rooms[curRoom]) { $("rh").textContent = subs(rooms[curRoom]); $("rm").textContent = roomInfo(rooms[curRoom]); renderAtt(); }
+  if (id === "s8" && rooms[curChild] && me) openChild(curChild);
+  if (id === "s12") openHw();
+  if (id === "s13") openStat(statWho);
+}
+function loadLang(c, cb){
+  if (c === "en" || I18N[c]) return cb();
+  var el = document.createElement("script");
+  el.src = "lang/" + c + ".js?v=1";
+  el.onload = cb;
+  el.onerror = function(){ toast("No internet connection"); };
+  document.head.appendChild(el);
+}
+function setLang(c){
+  closeSheet();
+  loadLang(c, function(){
+    lang = c;
+    try { localStorage.setItem("tt_lang", c); } catch (e) {}
+    refreshAll();
+  });
+}
+collectStatic();
+var savedLang = "en";
+try { savedLang = localStorage.getItem("tt_lang") || "en"; } catch (e) {}
+loadLang(savedLang, function(){ lang = savedLang; applyStatic(); });
+boot();
+if ("serviceWorker" in navigator && location.protocol === "https:") {
+  window.addEventListener("load", function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); });
+}
+</script>
+</body>
+</html>
